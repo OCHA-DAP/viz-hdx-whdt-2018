@@ -37,9 +37,16 @@ function genererF10 (data, fundingData) {
                     centered: true,
                     outer: false
                 }
-            }
+            },
+            y: {
+                show: true,
+                tick: {
+                    count: 3,
+                    format: d3.format('.2s'),
+                }
+            },
         },
-        size: {height: 200}
+        size: {height: 150}
     });
 
     var fundingRq12 = ['Requirement'],
@@ -76,14 +83,13 @@ function genererF10 (data, fundingData) {
             }
         }
     }
-    var charts = '',
-        fundingsReq = [fundingRq12,fundingRq34,fundingRq56,fundingRq7],
+    var fundingsReq = [fundingRq12,fundingRq34,fundingRq56,fundingRq7],
         fundingsRecv= [fundingRcv12,fundingRcv34,fundingRcv56,fundingRcv7],
         targets = [target12, target34, target56, target7],
-        targetedArr = ['x', 2011, 2012, 2013, 2014, 2015, 2016, 2017];
+        targetedArr = ['x', 2011, 2012, 2013, 2014, 2015, 2016, 2017],
+        titles = ["1-2 Years", "3-4 Years", "5-6 Years", "More than 7 Years"];
     for (var i = 0; i < 4; i++) {
-        $('#fundingRR').append('<div class="col-md-12" id="chart'+i+'"></div>');
-        $('#peopleTargted').append('<div class="col-md-12" id="chartp'+i+'"></div>');
+        $('.charts').append('<div class="header"><strong>'+titles[i]+'</strong></div><div class="col-md-6 col-sm-12" id="chart'+i+'"></div><div class="col-md-6 col-sm-12" id="chartp'+i+'"></div>');
         var chartF = c3.generate({
             bindto: '#chart'+i,
             data: {
@@ -109,8 +115,8 @@ function genererF10 (data, fundingData) {
                     }
                 }
             },
-            size: {height: 160},
-            legend : {hide: true}
+            size: {height: 150},
+            legend : {hide: false}
         });
         var chartP = c3.generate({
             bindto: '#chartp'+i,
@@ -137,12 +143,104 @@ function genererF10 (data, fundingData) {
                     }
                 }
             },
-            size: {height: 160},
+            size: {height: 150},
             legend : {hide: true}
         });
         $('#chartp'+i).data('chartObj', chartP);
     }
 } //genererF10
+
+function genererGraphesDetails (data) {
+    var cf = crossfilter(data);
+    var crisesDim,
+        crisesGroup,
+        crisesChart;
+    crisesDim = cf.dimension(function(d){ return d['#country+name'];});
+    crisesGroup = crisesDim.group().reduceSum(function(d){ return d['#inneed+concerned+unhrc'];});
+
+    crisesChart = dc.rowChart('#crises')
+                    .width($('.col-md-4').width())
+                    .height(850)
+                    .dimension(crisesDim)
+                    .group(crisesGroup)
+                    .data(function(d){
+                        return d.top(Infinity);
+                    })
+                    .colors(blueColor);
+    var yearDim = cf.dimension(function(d){ return d['#date+year'];}),
+        lengthCrisisDim = cf.dimension(function(d){ return [d['#date+year'], d['#indicator+length_crisis'],d['#inneed+total']]; });
+
+    var unhrcIDPgrp = yearDim.group().reduceSum(function(d){ return d['#inneed+idps+unhrc'];}),
+        unhrcRefgrp = yearDim.group().reduceSum(function(d){ return d['#inneed+refugees+unhrc'];}),
+        populationgrp = yearDim.group().reduceSum(function(d){ return d['#population+total'];}),
+        hdiScoregrp = yearDim.group().reduceSum(function(d){ return d['#indicator+hdi'];}),
+        schoolCompletiongrp = yearDim.group().reduceSum(function(d){ return d['#indicator+primary_completion'];}),
+        lengthCrisisgrp = lengthCrisisDim.group().reduceSum(function(d){ return d['#inneed+total']; });
+
+        // for (d in lengthCrisisgrp) {
+        //     console.log(lengthCrisisgrp[d])
+        // }
+        dc.barChart('#idp')
+            // .width($('.col-md-4').width())
+            .width(450)
+            .height(200)
+            .dimension(yearDim)
+            .group(unhrcIDPgrp)
+            .colors(blueColor)
+            .elasticX(true)
+            .elasticY(true)
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal)
+            .xAxis().ticks(4);
+
+        dc.barChart('#refugees')
+            .width(450)
+            .height(200)
+            .dimension(yearDim)
+            .group(unhrcRefgrp)
+            .colors(blueColor)
+            .elasticX(true)
+            .elasticY(true)
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal)
+            .xAxis().ticks(4);
+
+        dc.barChart('#pop')
+            .width(450)
+            .height(200)
+            .dimension(yearDim)
+            .group(populationgrp)
+            .colors(redColor)
+            .elasticX(true)
+            .elasticY(true)
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal)
+            .xAxis().ticks(4);
+
+        dc.bubbleChart('#lengthcrisis')
+            .width(800)
+            .height(200)
+            .dimension(lengthCrisisDim)
+            .group(lengthCrisisgrp)
+            .colors(redColor)
+            .keyAccessor(function (p) {
+                return parseInt(p.key[0]);
+            })
+            .valueAccessor(function (p) {
+                return parseInt(p.key[1]);
+            })
+            .radiusValueAccessor(function (p) {
+                return p.value;
+            })
+            .maxBubbleRelativeSize(0.01)
+            .x(d3.scale.linear().domain([0, 2020]))
+            .y(d3.scale.linear().domain([0, 18]))
+            .r(d3.scale.linear().domain([0, 22000000]))
+            .elasticX(true)
+            .elasticY(true);
+
+    dc.renderAll();
+} //genererGraphesDetails
 
 var lengthCrisisCall = $.ajax({
     type: 'GET',
@@ -152,22 +250,30 @@ var lengthCrisisCall = $.ajax({
 
 var funding_targetCall = $.ajax({
     type: 'GET',
-    url: 'https://proxy.hxlstandard.org/data.json?strip-headers=on&url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1q8CtQ5WF0k9E6dYiPmYDTRysLmxFfRRJaFuxnDlzPT8%2Fedit%23gid%3D197014187&force=on',
+    url: 'https://proxy.hxlstandard.org/data.json?strip-headers=on&url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1q8CtQ5WF0k9E6dYiPmYDTRysLmxFfRRJaFuxnDlzPT8%2Fedit%23gid%3D197014187',
     dataType: 'json',
 });
 
-// var humdevCall = $.ajax({
-//     type: 'GET',
-//     url: 'https://proxy.hxlstandard.org/data.json?strip-headers=on&url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1d6sfezP3DEfuQuTWzUHU3Q-F6vWjfNwYwIN9RRo3NhU%2Fedit%23gid%3D2126220157',
-//     dataType: 'json',
-// });
-
-$.when(lengthCrisisCall, funding_targetCall).then(function (lengthCrisisArgs, funding_targetArgs) {
-    var lengthCrisisData = hxlProxyToJSON(lengthCrisisArgs[0]);
-    var funding_targetData = hxlProxyToJSON(funding_targetArgs[0]);
-    genererF10(lengthCrisisData, funding_targetData)
+var humdevCall = $.ajax({
+    type: 'GET',
+    url: 'https://proxy.hxlstandard.org/data.json?strip-headers=on&url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1q8CtQ5WF0k9E6dYiPmYDTRysLmxFfRRJaFuxnDlzPT8%2Fedit%23gid%3D1471518527&force=on',
+    dataType: 'json',
 });
 
+$.when(lengthCrisisCall, funding_targetCall, humdevCall).then(function (lengthCrisisArgs, funding_targetArgs, humdevArgs) {
+    var lengthCrisisData = hxlProxyToJSON(lengthCrisisArgs[0]);
+    var funding_targetData = hxlProxyToJSON(funding_targetArgs[0]);
+    var humdevData = hxlProxyToJSON(humdevArgs[0]);
+    genererF10(lengthCrisisData, funding_targetData);
+
+
+});
+
+$.when(humdevCall).then(function (humdevArgs) {
+    var humdevData = hxlProxyToJSON(humdevArgs);
+    genererGraphesDetails(humdevData)
+
+});
 
 function hxlProxyToJSON(input, headers) {
     var output = [];
