@@ -156,17 +156,20 @@ function genererGraphesDetails (data) {
         crisesGroup,
         crisesChart;
     crisesDim = cf.dimension(function(d){ return d['#country+name'];});
-    crisesGroup = crisesDim.group().reduceSum(function(d){ return d['#inneed+concerned+unhrc'];});
+    crisesGroup = crisesDim.group().reduceSum(function(d){ return d['#indicator+length_crisis'];});
 
-    crisesChart = dc.rowChart('#crises')
-                    .width($('.col-md-4').width())
-                    .height(850)
+    crisesChart = dc.barChart('#crises')
+                    .width($('.col-md-12').width())
+                    .height(180)
+                    .margins({ top: 0, right: 20, bottom: 80, left: 0 })
                     .dimension(crisesDim)
                     .group(crisesGroup)
-                    .data(function(d){
-                        return d.top(Infinity);
-                    })
+                    .x(d3.scale.ordinal())
+                    .xUnits(dc.units.ordinal)
+                    .elasticY(true)
                     .colors(blueColor);
+    var composite = dc.compositeChart('#killed');
+
     var yearDim = cf.dimension(function(d){ return d['#date+year'];}),
         lengthCrisisDim = cf.dimension(function(d){ return [d['#date+year'], d['#indicator+length_crisis'],d['#inneed+total']]; });
 
@@ -177,67 +180,96 @@ function genererGraphesDetails (data) {
         schoolCompletiongrp = yearDim.group().reduceSum(function(d){ return d['#indicator+primary_completion'];}),
         lengthCrisisgrp = lengthCrisisDim.group().reduceSum(function(d){ return d['#inneed+total']; });
 
+    var naturalDisastersKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+natural_disasters'];}),
+        droughtKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+drought'];}),
+        earthquakeKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+earthquake'];}),
+        wildfireKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+wildfire'];}),
+        floodKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+flood'];}),
+        stormKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+storms'];}),
+        tempKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+temperature'];}),
+        volcanoeKill = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+volcanoes'];}),
+        wetKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+wet'];});
+
         // for (d in lengthCrisisgrp) {
         //     console.log(lengthCrisisgrp[d])
         // }
-        dc.barChart('#idp')
+        var idpBarChart = dc.barChart('#idp')
             // .width($('.col-md-4').width())
             .width(450)
             .height(200)
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal)
             .dimension(yearDim)
             .group(unhrcIDPgrp)
             .colors(blueColor)
             .elasticX(true)
-            .elasticY(true)
-            .x(d3.scale.ordinal())
-            .xUnits(dc.units.ordinal)
-            .xAxis().ticks(4);
+            .elasticY(true);
 
-        dc.barChart('#refugees')
+        idpBarChart.yAxis().tickFormat(d3.format('.2s'));
+
+        refugeesBarChart = dc.barChart('#refugees')
             .width(450)
             .height(200)
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal)
             .dimension(yearDim)
             .group(unhrcRefgrp)
             .colors(blueColor)
             .elasticX(true)
-            .elasticY(true)
-            .x(d3.scale.ordinal())
-            .xUnits(dc.units.ordinal)
-            .xAxis().ticks(4);
+            .elasticY(true);
+        refugeesBarChart.yAxis().tickFormat(d3.format('.2s'));
 
-        dc.barChart('#pop')
+        popBarChart = dc.barChart('#pop')
             .width(450)
             .height(200)
+            .x(d3.scale.ordinal())
+            .xUnits(dc.units.ordinal)
             .dimension(yearDim)
             .group(populationgrp)
             .colors(redColor)
             .elasticX(true)
-            .elasticY(true)
-            .x(d3.scale.ordinal())
-            .xUnits(dc.units.ordinal)
-            .xAxis().ticks(4);
-
-        dc.bubbleChart('#lengthcrisis')
-            .width(800)
-            .height(200)
-            .dimension(lengthCrisisDim)
-            .group(lengthCrisisgrp)
-            .colors(redColor)
-            .keyAccessor(function (p) {
-                return parseInt(p.key[0]);
-            })
-            .valueAccessor(function (p) {
-                return parseInt(p.key[1]);
-            })
-            .radiusValueAccessor(function (p) {
-                return p.value;
-            })
-            .maxBubbleRelativeSize(0.01)
-            .x(d3.scale.linear().domain([0, 2020]))
-            .y(d3.scale.linear().domain([0, 18]))
-            .r(d3.scale.linear().domain([0, 22000000]))
-            .elasticX(true)
             .elasticY(true);
+        popBarChart.yAxis().tickFormat(d3.format('.2s'));
+
+        composite.width(450)
+                .height(200)
+                .x(d3.scale.ordinal())
+                .xUnits(dc.units.ordinal)
+                .dimension(yearDim)
+                .compose(
+                    [
+                    dc.lineChart(composite)
+                        .group(naturalDisastersKil)
+                        
+                        .elasticY(true),
+                    dc.lineChart(composite)
+                        .group(droughtKil)
+                        .dimension(yearDim)
+                    ]
+                )
+                .brushOn(false);
+
+        // dc.bubbleChart('#lengthcrisis')
+        //     .width(800)
+        //     .height(200)
+        //     .dimension(lengthCrisisDim)
+        //     .group(lengthCrisisgrp)
+        //     .colors(redColor)
+        //     .keyAccessor(function (p) {
+        //         return parseInt(p.key[0]);
+        //     })
+        //     .valueAccessor(function (p) {
+        //         return parseInt(p.key[1]);
+        //     })
+        //     .radiusValueAccessor(function (p) {
+        //         return p.value;
+        //     })
+        //     .maxBubbleRelativeSize(0.01)
+        //     .x(d3.scale.linear().domain([0, 2020]))
+        //     .y(d3.scale.linear().domain([0, 18]))
+        //     .r(d3.scale.linear().domain([0, 22000000]))
+        //     .elasticX(true)
+        //     .elasticY(true);
 
     dc.renderAll();
 } //genererGraphesDetails

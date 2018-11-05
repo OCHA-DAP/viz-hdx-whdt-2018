@@ -13,3 +13,10 @@ p{
 .charts{
 	width: 100%;
 }
+#crises svg g g.axis.x text {
+    text-anchor: end !important;
+    transform: rotate(-25deg);
+}
+#crises svg g g.axis.y {
+    display: none;
+}
