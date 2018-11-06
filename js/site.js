@@ -8,6 +8,12 @@ var sortData = function (d1, d2) {
     return 0;
 };
 
+var date_sort = function (d1, d2) {
+    if (d1['#date+year'] > d2['#date+year']) return 1;
+    if (d1['#date+year'] < d2['#date+year']) return -1;
+    return 0;
+}
+
 function genererF10 (data, fundingData) {
     var cf = crossfilter(data);
     var dim = cf.dimension(function(d){ return [d['#date+year'], d['#indicator+name']]; });
@@ -157,122 +163,95 @@ function genererGraphesDetails (data) {
         crisesChart;
     crisesDim = cf.dimension(function(d){ return d['#country+name'];});
     crisesGroup = crisesDim.group().reduceSum(function(d){ return d['#indicator+length_crisis'];});
+    crisesChart = dc.barChart('#crises');
 
-    crisesChart = dc.barChart('#crises')
-                    .width($('.col-md-12').width())
-                    .height(180)
-                    .margins({ top: 0, right: 20, bottom: 80, left: 0 })
-                    .dimension(crisesDim)
-                    .group(crisesGroup)
-                    .x(d3.scale.ordinal())
-                    .xUnits(dc.units.ordinal)
-                    .elasticY(true)
-                    .colors(blueColor);
-    var composite = dc.compositeChart('#killed');
-
-    var yearDim = cf.dimension(function(d){ return d['#date+year'];}),
-        lengthCrisisDim = cf.dimension(function(d){ return [d['#date+year'], d['#indicator+length_crisis'],d['#inneed+total']]; });
-
-    var unhrcIDPgrp = yearDim.group().reduceSum(function(d){ return d['#inneed+idps+unhrc'];}),
-        unhrcRefgrp = yearDim.group().reduceSum(function(d){ return d['#inneed+refugees+unhrc'];}),
-        populationgrp = yearDim.group().reduceSum(function(d){ return d['#population+total'];}),
-        hdiScoregrp = yearDim.group().reduceSum(function(d){ return d['#indicator+hdi'];}),
-        schoolCompletiongrp = yearDim.group().reduceSum(function(d){ return d['#indicator+primary_completion'];}),
-        lengthCrisisgrp = lengthCrisisDim.group().reduceSum(function(d){ return d['#inneed+total']; });
-
-    var naturalDisastersKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+natural_disasters'];}),
-        droughtKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+drought'];}),
-        earthquakeKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+earthquake'];}),
-        wildfireKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+wildfire'];}),
-        floodKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+flood'];}),
-        stormKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+storms'];}),
-        tempKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+temperature'];}),
-        volcanoeKill = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+volcanoes'];}),
-        wetKil = yearDim.group().reduceSum(function(d){ return d['#indicator+killed+wet'];});
-
-        // for (d in lengthCrisisgrp) {
-        //     console.log(lengthCrisisgrp[d])
-        // }
-        var idpBarChart = dc.barChart('#idp')
-            // .width($('.col-md-4').width())
-            .width(450)
-            .height(200)
+    crisesChart
+            .width($('.col-md-12').width())
+            .height(180)
+            .margins({ top: 0, right: 20, bottom: 80, left: 0 })
             .x(d3.scale.ordinal())
             .xUnits(dc.units.ordinal)
-            .dimension(yearDim)
-            .group(unhrcIDPgrp)
             .colors(blueColor)
-            .elasticX(true)
-            .elasticY(true);
+            .dimension(crisesDim)
+            .group(crisesGroup)
+            .brushOn(false);
 
-        idpBarChart.yAxis().tickFormat(d3.format('.2s'));
+    crisesChart.renderlet(function (chart) {
+        chart.selectAll("rect.bar").on("click", function (d) {
+            chart.filter(null).filter(d.data.key).redrawGroup();
+            generateDetailsCharts(crisesDim.filter(d.x).top(Infinity).sort(date_sort));
+        })
+    });
+    crisesChart.render();
 
-        refugeesBarChart = dc.barChart('#refugees')
-            .width(450)
-            .height(200)
-            .x(d3.scale.ordinal())
-            .xUnits(dc.units.ordinal)
-            .dimension(yearDim)
-            .group(unhrcRefgrp)
-            .colors(blueColor)
-            .elasticX(true)
-            .elasticY(true);
-        refugeesBarChart.yAxis().tickFormat(d3.format('.2s'));
-
-        popBarChart = dc.barChart('#pop')
-            .width(450)
-            .height(200)
-            .x(d3.scale.ordinal())
-            .xUnits(dc.units.ordinal)
-            .dimension(yearDim)
-            .group(populationgrp)
-            .colors(redColor)
-            .elasticX(true)
-            .elasticY(true);
-        popBarChart.yAxis().tickFormat(d3.format('.2s'));
-
-        composite.width(450)
-                .height(200)
-                .x(d3.scale.ordinal())
-                .xUnits(dc.units.ordinal)
-                .dimension(yearDim)
-                .compose(
-                    [
-                    dc.lineChart(composite)
-                        .group(naturalDisastersKil)
-                        
-                        .elasticY(true),
-                    dc.lineChart(composite)
-                        .group(droughtKil)
-                        .dimension(yearDim)
-                    ]
-                )
-                .brushOn(false);
-
-        // dc.bubbleChart('#lengthcrisis')
-        //     .width(800)
-        //     .height(200)
-        //     .dimension(lengthCrisisDim)
-        //     .group(lengthCrisisgrp)
-        //     .colors(redColor)
-        //     .keyAccessor(function (p) {
-        //         return parseInt(p.key[0]);
-        //     })
-        //     .valueAccessor(function (p) {
-        //         return parseInt(p.key[1]);
-        //     })
-        //     .radiusValueAccessor(function (p) {
-        //         return p.value;
-        //     })
-        //     .maxBubbleRelativeSize(0.01)
-        //     .x(d3.scale.linear().domain([0, 2020]))
-        //     .y(d3.scale.linear().domain([0, 18]))
-        //     .r(d3.scale.linear().domain([0, 22000000]))
-        //     .elasticX(true)
-        //     .elasticY(true);
-
-    dc.renderAll();
 } //genererGraphesDetails
+
+function generateDetailsCharts(subData) {
+    var pop = ['Population'],
+        idps = ['IDPs'],
+        refugees = ['Refugees'],
+        dates = ['x'],
+        lengthCrisis = ['length'];
+    for (d in subData){
+        dates.push(Number(subData[d]['#date+year']));
+        pop.push(subData[d]['#population+total']);
+        refugees.push(subData[d]['#inneed+refugees+unhrc']);
+        idps.push(Number(subData[d]['#inneed+idps+unhrc']));
+        lengthCrisis.push(Number(subData[d]['#indicator+length_crisis']));
+    }
+    // var htm ='';
+    // for (d in subData){
+    //     htm += '<p>'+subData[d]['#date+year']+' for'+subData[d]['#country+name']+'</p>'
+    // }
+    var datas = [dates, idps,lengthCrisis];
+    $('.c3-charts').append('<div class="col-md-4" id="chart1"></div>');
+    var chart = c3BarLineChart(dates, idps,lengthCrisis);
+    $('#chart1').data('chartObj', c3BarLineChart(dates, idps,lengthCrisis));
+}//generateDetailsCharts
+
+function c3BarLineChart (x, b, l) {
+    return chart = c3.generate({
+            bindto: '#chart1',
+            size: { height: 155 },
+            color: {
+              pattern: ['#FF9B00', '#999']
+            },
+            data: {
+                x: 'x',
+                columns: [ x,b,l],
+                axes: { 'length': 'y2' },
+                types: { 'IDPs': 'bar' }
+            },
+            axis: {
+                x: {
+                    // type: 'timeseries',
+                    // localtime: false,
+                    tick: {
+                        centered: true,
+                        culling: { max: 4 },
+                        outer: false
+                    }
+                },
+                y: {
+                    label: {
+                        text: 'IDPs',
+                        position: 'outer-middle'
+                    },
+                    min: 0,
+                    padding: { bottom: 0 }
+                },
+                y2: {
+                    label: {
+                        text: 'length',
+                        position: 'outer-middle'
+                    },
+                    min: 0,
+                    padding: { bottom: 0 },
+                    show: true
+                }
+            }
+        });
+}//c3BarLineChart
 
 var lengthCrisisCall = $.ajax({
     type: 'GET',
