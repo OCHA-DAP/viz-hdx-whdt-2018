@@ -54,6 +54,7 @@ function genererF10(data, fundingData) {
                 tick: {
                     count: 3,
                     format: d3.format('.2s'),
+                    fit:true
                 }
             },
         },
@@ -160,7 +161,8 @@ function genererF10(data, fundingData) {
                 x: {
                     tick: {
                         centered: true,
-                        outer: false
+                        outer: false,
+                        fit: true,
                     }
                 }
             },
@@ -193,9 +195,9 @@ function genererGraphesDetails(data) {
         .height(150)
         .margins({
             top: 0,
-            right: 20,
+            right: 30,
             bottom: 80,
-            left: 0
+            left: 30
         })
         .x(d3.scale.ordinal())
         .xUnits(dc.units.ordinal)
@@ -227,7 +229,7 @@ function generateDetailsCharts(subData) {
         targeted = ['Targeted'],
         poc = ['Concerned'],
         dates = ['x'],
-        lengthCrisis = ['length'],
+        lengthCrisis = ['Length of crisis'],
         fundingMet = ['Funded'],
         fundingUnmet = ['Unmet'],
         lifeExp = ['Life expectancy'],
@@ -271,13 +273,13 @@ function generateDetailsCharts(subData) {
         fundingUnmet.push(Number(unfunded).toFixed(2) * 100);
 
     } //end for
-    $('#refugees').data('chartObj', c3BarLineChart(dates, refugees, lengthCrisis, "Refugees", "length", "refugees"));
-    $('#idps').data('chartObj', c3BarLineChart(dates, idps, lengthCrisis, "IDPs", "length", "idps"));
-    $('#idmcIDPs').data('chartObj', c3BarLineChart(dates, idmcIDPs, lengthCrisis, "IDPs", "length", "idmcIDPs"));
+    $('#refugees').data('chartObj', c3BarLineChart(dates, refugees, lengthCrisis, "Refugees", "Length of crisis", "refugees"));
+    $('#idps').data('chartObj', c3BarLineChart(dates, idps, lengthCrisis, "IDPs", "Length of crisis", "idps"));
+    $('#idmcIDPs').data('chartObj', c3BarLineChart(dates, idmcIDPs, lengthCrisis, "IDPs", "Length of crisis", "idmcIDPs"));
     $('#pop').data('chartObj', generatePopChart(dates, pop, urbanPop, lengthCrisis));
     $('#fundings').data('chartObj', generateFundingsCharts(dates, fundingMet, fundingUnmet, lengthCrisis));
     $('#target').data('chartObj', c3SimpleBarChart(dates, targeted, 'target'));
-    $('#peopleConcern').data('chartObj', c3BarLineChart(dates, poc, lengthCrisis, "PoC", "length", "peopleConcern"));
+    $('#peopleConcern').data('chartObj', c3BarLineChart(dates, poc, lengthCrisis, "PoC", "Length of crisis", "peopleConcern"));
     $('#lifeExp').data('chartObj', c3SimpleLinechart(dates,lifeExp, "lifeExp"));
     // $('#affected').data('chartObj', c3SimpleLinechart(dates,affDisaster,affDrougth,affEarthquake,affWildfire,affFlood,affStorms,affTemp,affVol,affWet,"affected"));
 } //generateDetailsCharts
@@ -373,7 +375,7 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
             x: 'x',
             columns: [x, funded, unfunded, lgth],
             axes: {
-                'length': 'y2'
+                'Length of crisis': 'y2'
             },
             types: {
                 'Funded': 'bar',
@@ -391,9 +393,9 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
                 }
             },
             y: {
-                label: {
-                    text: 'Population',
-                },
+                // label: {
+                //     text: 'Population',
+                // },
                 tick: {
                     count: 4,
                     format: d3.format('.3s'),
@@ -404,9 +406,9 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
                 }
             },
             y2: {
-                label: {
-                    text: 'Urban',
-                },
+                // label: {
+                //     text: 'Urban',
+                // },
                 tick: {
                     count: 4,
                     format: d3.format('.1s'),
@@ -435,7 +437,7 @@ function generatePopChart(dates, pop, urban, lgth) {
             x: 'x',
             columns: [dates, pop, urban, lgth],
             axes: {
-                'length': 'y2'
+                'Length of crisis': 'y2'
             },
             types: {
                 'Urban': 'bar',
@@ -450,9 +452,9 @@ function generatePopChart(dates, pop, urban, lgth) {
                 }
             },
             y: {
-                label: {
-                    text: 'Population',
-                },
+                // label: {
+                //     text: 'Population',
+                // },
                 tick: {
                     count: 4,
                     format: d3.format('.3s'),
@@ -463,9 +465,9 @@ function generatePopChart(dates, pop, urban, lgth) {
                 }
             },
             y2: {
-                label: {
-                    text: 'Urban',
-                },
+                // label: {
+                //     text: 'Urban',
+                // },
                 tick: {
                     count: 4,
                     format: d3.format('.1s'),
@@ -498,9 +500,9 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
         };
     }
 
-    if (lineLabel === "length") {
+    if (lineLabel === "Length of crisis") {
         axesDefinition = {
-            "length": 'y2'
+            "Length of crisis": 'y2'
         }
     }
 
@@ -527,10 +529,10 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
                 }
             },
             y: {
-                label: {
-                    text: barLabel,
-                    // position: 'outer-middle'
-                },
+                // label: {
+                //     text: barLabel,
+                //     // position: 'outer-middle'
+                // },
                 tick: {
                     count: 4,
                     format: d3.format('.3s'),
@@ -541,9 +543,9 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
                 }
             },
             y2: {
-                label: {
-                    text: lineLabel,
-                },
+                // label: {
+                //     text: lineLabel,
+                // },
                 tick: {
                     count: 4,
                     format: d3.format('.1s'),
