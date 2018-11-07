@@ -1,7 +1,18 @@
 body{
 	background-color: #DDDDDD;
 }
-p{
+h4 h5{
+	padding-left: 10px;
+}
+h6 {
+	text-align: center;
+	font-size: 15px;
+}
+p {
+	text-align: center;
+	font-size: 5px;
+}
+.desc{
     font-size: 11px;
     text-align: justify;
 }
@@ -19,4 +30,8 @@ p{
 }
 #crises svg g g.axis.y {
     display: none;
+}
+
+.detailCharts {
+	display: none;
 }

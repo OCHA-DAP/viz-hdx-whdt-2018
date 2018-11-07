@@ -207,7 +207,11 @@ function genererGraphesDetails(data) {
     crisesChart.renderlet(function(chart) {
         chart.selectAll("rect.bar").on("click", function(d) {
             chart.filter(null).filter(d.data.key).redrawGroup();
+            $('.detailCharts').show();
             generateDetailsCharts(crisesDim.filter(d.x).top(Infinity).sort(date_sort));
+            $("#detailCharts").scrollTop(660);
+            console.log(document.getElementsByClassName('detailCharts'))
+
         })
     });
     crisesChart.render();
@@ -225,7 +229,17 @@ function generateDetailsCharts(subData) {
         dates = ['x'],
         lengthCrisis = ['length'],
         fundingMet = ['Funded'],
-        fundingUnmet = ['Unmet'];
+        fundingUnmet = ['Unmet'],
+        lifeExp = ['Life expectancy'],
+        affDisaster = ['Disasters'],
+        affDrougth = ['Drought'],
+        affEarthquake = ['Earthquake'],
+        affWildfire = ['Wildfire'],
+        affFlood = ['Flood'],
+        affStorms = ['Storms'],
+        affTemp = ['Temperature'],
+        affVol = ['volcanoes'],
+        affWet = ['Wet'];
 
     for (d in subData) {
         dates.push(Number(subData[d]['#date+year']));
@@ -236,24 +250,80 @@ function generateDetailsCharts(subData) {
         targeted.push(Number(subData[d]['#inneed+targeted']));
         poc.push(Number(subData[d]['#inneed+concerned+unhrc']));
 
+        lifeExp.push(Number(subData[d]['#indicator+life_expec']));
+
         refugees.push(Number(subData[d]['#inneed+refugees+unhrc']));
         idps.push(Number(subData[d]['#inneed+idps+unhrc']));
-        idmcIDPs.push(Number(subData[d]['#inneed+idps+idmc']));
+        idmcIDPs.push(subData[d]['#inneed+idmc+idps']);
+
+        affDisaster.push(Number(subData[d]['#affected+natural_disasters+total']));
+        affDrougth.push(Number(subData[d]['#affected+drought+total']));
+        affEarthquake.push(Number(subData[d]['#affected+earthquake+total']));
+        affWildfire.push(Number(subData[d]['#affected+wildfire+total']));
+        affFlood.push(Number(subData[d]['#affected+flood+total']));
+        affStorms.push(Number(subData[d]['#affected+storms+total']));
+        affTemp.push(Number(subData[d]['#affected+temperature+total']));
+        affVol.push(Number(subData[d]['#affected+volcanoes+total']));
+        affWet.push(Number(subData[d]['#affected+wet+total']));
 
         let unfunded = (Number(subData[d]['#funding+requirements']) - Number(subData[d]['#funding+received'])) / Number(subData[d]['#funding+requirements'])
         fundingMet.push(Number(subData[d]['#indicator+requirements_met']).toFixed(2) * 100);
         fundingUnmet.push(Number(unfunded).toFixed(2) * 100);
 
     } //end for
-    console.log(idmcIDPs)
     $('#refugees').data('chartObj', c3BarLineChart(dates, refugees, lengthCrisis, "Refugees", "length", "refugees"));
     $('#idps').data('chartObj', c3BarLineChart(dates, idps, lengthCrisis, "IDPs", "length", "idps"));
     $('#idmcIDPs').data('chartObj', c3BarLineChart(dates, idmcIDPs, lengthCrisis, "IDPs", "length", "idmcIDPs"));
     $('#pop').data('chartObj', generatePopChart(dates, pop, urbanPop, lengthCrisis));
     $('#fundings').data('chartObj', generateFundingsCharts(dates, fundingMet, fundingUnmet, lengthCrisis));
-    $('#target').data('chartObj', c3SimpleBarChart(dates, fundingMet, 'target'));
+    $('#target').data('chartObj', c3SimpleBarChart(dates, targeted, 'target'));
     $('#peopleConcern').data('chartObj', c3BarLineChart(dates, poc, lengthCrisis, "PoC", "length", "peopleConcern"));
+    $('#lifeExp').data('chartObj', c3SimpleLinechart(dates,lifeExp, "lifeExp"));
+    // $('#affected').data('chartObj', c3SimpleLinechart(dates,affDisaster,affDrougth,affEarthquake,affWildfire,affFlood,affStorms,affTemp,affVol,affWet,"affected"));
 } //generateDetailsCharts
+
+function c3SimpleLinechart (x, data, bind) {
+    let cols = [];
+    if (arguments.length > 3) {
+        for (var i = 0; i < arguments.length-1; i++) {
+            cols.push(arguments[i])
+        }
+    } else {
+        cols = [x, arguments[1]];
+    }
+    return c3.generate({
+        bindto: '#' + bind,
+        data: {
+            x: 'x',
+            columns: cols,
+            type: 'line',
+        },
+        color: {
+            pattern: [blueColor]
+        },
+        axis: {
+            y: {
+                show: true,
+                tick: {
+                    count: 4,
+                    format: d3.format('.2s'),
+                },
+            },
+            x: {
+                tick: {
+                    centered: true,
+                    outer: false
+                }
+            }
+        },
+        size: {
+            height: 180
+        },
+        legend: {
+            hide: false
+        }
+    });
+} //c3SimpleLinechart
 
 function c3SimpleBarChart(x, data, bind) {
     return c3.generate({
@@ -411,9 +481,9 @@ function generatePopChart(dates, pop, urban, lgth) {
 } //generatePopChart
 
 function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
-    console.log(b[0])
     let typeDefinition,
         axesDefinition;
+
     if (b[0] === "IDPs") {
         typeDefinition = {
             "IDPs": 'bar'
@@ -428,7 +498,7 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
         };
     }
 
-    if (l[0] === "length") {
+    if (lineLabel === "length") {
         axesDefinition = {
             "length": 'y2'
         }
