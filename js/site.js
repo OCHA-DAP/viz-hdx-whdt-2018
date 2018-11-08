@@ -35,7 +35,7 @@ function genererF10(data, fundingData) {
         bindto: '#chart',
         data: {
             x: 'x',
-            type: 'line',
+            type: 'area',
             columns: [yearArr, avgLCArr, interAarr],
         },
         color: {
@@ -288,8 +288,9 @@ function generateDetailsCharts(subData) {
         affWet = ['Wet'];
 
     for (d in subData) {
+        // console.log(subData[d])
         dates.push(Number(subData[d]['#date+year']));
-        lengthCrisis.push(Number(subData[d]['#indicator+length_crisis']));
+        lengthCrisis.push(parseInt(subData[d]['#indicator+length_crisis']));
 
         pop.push(Number(subData[d]['#population+total']));
         urbanPop.push(Number(subData[d]['#population+urban']));
@@ -488,7 +489,7 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
                 // },
                 tick: {
                     count: 4,
-                    format: d3.format('.1s'),
+                    format: d3.format('s'),
                 },
                 show: false,
                 padding: {
@@ -549,7 +550,7 @@ function generatePopChart(dates, pop, urban, lgth) {
                 // },
                 tick: {
                     count: 4,
-                    format: d3.format('.1s'),
+                    format: d3.format('s'),
                 },
                 // min: 0,
                 padding: {
@@ -564,7 +565,7 @@ function generatePopChart(dates, pop, urban, lgth) {
 
 function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
     let typeDefinition,
-        axesDefinition;
+        axesDefinition = {"Length of crisis": 'y2'};
 
     if (b[0] === "IDPs") {
         typeDefinition = {
@@ -580,11 +581,11 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
         };
     }
 
-    if (lineLabel === "Length of crisis") {
-        axesDefinition = {
-            "Length of crisis": 'y2'
-        }
-    }
+    // if (lineLabel === "Length of crisis") {
+    //     axesDefinition = {
+    //         "Length of crisis": 'y2'
+    //     }
+    // }
 
     return c3.generate({
         bindto: '#'+bind,
@@ -627,8 +628,8 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
                 //     text: lineLabel,
                 // },
                 tick: {
-                    count: 4,
-                    format: d3.format('.1s'),
+                    count: 5,
+                    format: d3.format('s'),
                 },
                 padding: {
                     bottom: 0
