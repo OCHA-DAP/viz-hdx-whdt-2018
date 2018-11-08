@@ -15,6 +15,14 @@ var date_sort = function(d1, d2) {
     return 0;
 }
 
+var formatBillion = function (d) {
+    return "$" + d +" B";
+};
+
+var formatMillion = function (d) {
+    return "$ " + d +" M";
+};
+
 function genererF10(data, fundingData) {
     var cf = crossfilter(data);
     var dim = cf.dimension(function(d) {
@@ -59,7 +67,7 @@ function genererF10(data, fundingData) {
             },
         },
         size: {
-            height: 150
+            height: 180
         }
     });
 
@@ -139,7 +147,9 @@ function genererF10(data, fundingData) {
             legend: {
                 hide: false
             },
-            tooltip: {contents : tooltip_contents}
+            tooltip: {
+                contents : tooltip_contents
+            }
         });
         var chartP = c3.generate({
             bindto: '#chartp' + i,
@@ -194,12 +204,12 @@ function tooltip_contents(d, defaultTitleFormat, defaultValueFormat, color) {
         // if (d[i].name === 'IDPs') { continue; }
         //lgth = 0 : 1-2year, = 1 : 3-4years etc
         if (ele === 'chart0') {
-            d[i].x === 2013 ? message = "Funding requested 1−2 years crises spike due to the beginning of the Syria appeals, the largest in history." : "";
+            d[i].x === 2013 ? message = "<p>Funding requested 1−2 years crises spike due to the beginning of the Syria appeals, the largest in history.</p>" : "";
         } else if (ele === 'chart1') {
-            d[i].x == 2014 ? message = "Funding in the 3−4 years balloons with the advent of billion-dollar appeals in Syria and South Sudan." :
-            d[i].x == 2015 ? message = "Funding in the 3−4 years balloons with the advent of billion-dollar appeals in Syria and South Sudan." : "";
+            d[i].x == 2014 ? message = "<p>Funding in the 3−4 years balloons with the advent of billion-dollar appeals in Syria and South Sudan.</p>" :
+            d[i].x == 2015 ? message = "<p>Funding in the 3−4 years balloons with the advent of billion-dollar appeals in Syria and South Sudan.</p>" : "";
         } else if (ele === 'chart2' || 'chart3') {
-            d[i].x ===  2017 ? message = "Funding requested is primarily driven by protracted crises, especially Syria, Somalia, South Sudan and Sudan." : "";
+            d[i].x ===  2017 ? message = "<p>Funding requested is primarily driven by protracted crises, especially Syria, Somalia, South Sudan and Sudan.</p>" : "";
         }
 
         if (! text) {
@@ -212,7 +222,7 @@ function tooltip_contents(d, defaultTitleFormat, defaultValueFormat, color) {
         bgcolor = $$.levelColor ? $$.levelColor(d[i].value) : color(d[i].id);
         text += "<tr class='" + CLASS.tooltipName + "-" + d[i].id + "'>";
         text += "<td class='name'><span style='background-color:" + bgcolor + "'></span>" + name + "</td>";
-        text += "<td class='value'>" + value + "</td>";
+        text += "<td class='value'>" + formatBillion(value) + "</td>";
         text += "</tr>";
 
     }
