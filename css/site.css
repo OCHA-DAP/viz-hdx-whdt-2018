@@ -1,14 +1,14 @@
-body{
+/*body{
 	background-color: #DDDDDD;
-}
+}*/
 h4 h5{
 	padding-left: 10px;
 }
 h6 {
 	text-align: center;
-	font-size: 15px;
+	font-size: 14px;
 }
-p, .small{
+.small{
 	text-align: center;
 	font-size: 11px;
 	margin: 0 0 0px;

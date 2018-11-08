@@ -138,7 +138,8 @@ function genererF10(data, fundingData) {
             },
             legend: {
                 hide: false
-            }
+            },
+            tooltip: {contents : tooltip_contents}
         });
         var chartP = c3.generate({
             bindto: '#chartp' + i,
@@ -177,6 +178,48 @@ function genererF10(data, fundingData) {
     }
 } //genererF10
 
+function tooltip_contents(d, defaultTitleFormat, defaultValueFormat, color) {
+    var $$ = this, config = $$.config, CLASS = $$.CLASS,
+        titleFormat = config.tooltip_format_title || defaultTitleFormat,
+        nameFormat = config.tooltip_format_name || function (name) { return name; },
+        valueFormat = config.tooltip_format_value || defaultValueFormat,
+        text, i, title, value, name, bgcolor, message = "";
+    // You can access all of data like this:
+    // console.log($$.api.element.id);
+        let ele = $$.api.element.id ;
+    for (i = 0; i < d.length; i++) {
+        // if (! (d[i] && (d[i].value || d[i].value === 0))) { continue; }
+
+        // ADD
+        // if (d[i].name === 'IDPs') { continue; }
+        //lgth = 0 : 1-2year, = 1 : 3-4years etc
+        if (ele === 'chart0') {
+            d[i].x === 2013 ? message = "Funding requested 1−2 years crises spike due to the beginning of the Syria appeals, the largest in history." : "";
+        } else if (ele === 'chart1') {
+            d[i].x == 2014 ? message = "Funding in the 3−4 years balloons with the advent of billion-dollar appeals in Syria and South Sudan." :
+            d[i].x == 2015 ? message = "Funding in the 3−4 years balloons with the advent of billion-dollar appeals in Syria and South Sudan." : "";
+        } else if (ele === 'chart2' || 'chart3') {
+            d[i].x ===  2017 ? message = "Funding requested is primarily driven by protracted crises, especially Syria, Somalia, South Sudan and Sudan." : "";
+        }
+
+        if (! text) {
+            title = d[i].x
+            text = "<table class='" + CLASS.tooltip + "'>" + (title || title === 0 ? "<tr><th colspan='2'>" + title + "</th></tr>" : "");
+        }
+
+        name = nameFormat(d[i].name);
+        value = valueFormat(d[i].value, d[i].ratio, d[i].id, d[i].index);
+        bgcolor = $$.levelColor ? $$.levelColor(d[i].value) : color(d[i].id);
+        text += "<tr class='" + CLASS.tooltipName + "-" + d[i].id + "'>";
+        text += "<td class='name'><span style='background-color:" + bgcolor + "'></span>" + name + "</td>";
+        text += "<td class='value'>" + value + "</td>";
+        text += "</tr>";
+
+    }
+    text += "<tr><td>" + message + "</td></tr>";
+    return text + "</table>";
+}//tooltip_contents
+
 function genererGraphesDetails(data) {
     var cf = crossfilter(data);
     var crisesDim,
@@ -210,9 +253,10 @@ function genererGraphesDetails(data) {
         chart.selectAll("rect.bar").on("click", function(d) {
             chart.filter(null).filter(d.data.key).redrawGroup();
             $('.detailCharts').show();
+            countrySelected(d.x);
             generateDetailsCharts(crisesDim.filter(d.x).top(Infinity).sort(date_sort));
-            $("#detailCharts").scrollTop(660);
-            console.log(document.getElementsByClassName('detailCharts'))
+            // $("#detailCharts").scrollTop(660);
+            // console.log(document.getElementsByClassName('detailCharts'))
 
         })
     });
@@ -280,9 +324,44 @@ function generateDetailsCharts(subData) {
     $('#fundings').data('chartObj', generateFundingsCharts(dates, fundingMet, fundingUnmet, lengthCrisis));
     $('#target').data('chartObj', c3SimpleBarChart(dates, targeted, 'target'));
     $('#peopleConcern').data('chartObj', c3BarLineChart(dates, poc, lengthCrisis, "PoC", "Length of crisis", "peopleConcern"));
-    $('#lifeExp').data('chartObj', c3SimpleLinechart(dates,lifeExp, "lifeExp"));
+    $('#lifeExp').data('chartObj', generateLifeExpChart(dates,lifeExp, "lifeExp"));
     // $('#affected').data('chartObj', c3SimpleLinechart(dates,affDisaster,affDrougth,affEarthquake,affWildfire,affFlood,affStorms,affTemp,affVol,affWet,"affected"));
 } //generateDetailsCharts
+
+function generateLifeExpChart (x, data, bind) {
+    return c3.generate({
+        bindto: '#' + bind,
+        data: {
+            x: 'x',
+            columns: [x, data],
+            type: 'area',
+        },
+        color: {
+            pattern: [blueColor]
+        },
+        axis: {
+            y: {
+                show: true,
+                tick: {
+                    count: 4,
+                    format: d3.format('.2s'),
+                },
+            },
+            x: {
+                tick: {
+                    centered: true,
+                    outer: false
+                }
+            }
+        },
+        size: {
+            height: 180
+        },
+        legend: {
+            hide: true
+        }
+    });
+} //c3SimpleLinechart
 
 function c3SimpleLinechart (x, data, bind) {
     let cols = [];
@@ -322,7 +401,7 @@ function c3SimpleLinechart (x, data, bind) {
             height: 180
         },
         legend: {
-            hide: false
+            hide: true
         }
     });
 } //c3SimpleLinechart
@@ -356,9 +435,7 @@ function c3SimpleBarChart(x, data, bind) {
         size: {
             height: 180
         },
-        legend: {
-            hide: false
-        }
+        legend: { hide: true }
     });
 } //c3SimpleBarChart
 
@@ -417,9 +494,11 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
                 padding: {
                     bottom: 0
                 },
-                show: false
+                show: true
             }
-        }
+        },
+        legend: { hide: true }
+
     });
 } //generateFundingsCharts
 
@@ -478,7 +557,8 @@ function generatePopChart(dates, pop, urban, lgth) {
                 },
                 show: true
             }
-        }
+        },
+        legend: { hide: true }
     });
 } //generatePopChart
 
@@ -555,9 +635,17 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
                 },
                 show: true
             }
+        },
+        legend: { hide: true },
+        padding: {
+            bottom: 0,
         }
     });
 } //c3BarLineChart
+
+function countrySelected (country) {
+    $('#countrySelected h5').html(country);
+} // countrySelected
 
 var lengthCrisisCall = $.ajax({
     type: 'GET',
