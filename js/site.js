@@ -360,9 +360,6 @@ function genererGraphesDetails(data) {
             $('.detailCharts').show();
             countrySelected(d.x);
             generateDetailsCharts(crisesDim.filter(d.x).top(Infinity).sort(date_sort));
-            // $("#detailCharts").scrollTop(660);
-            // console.log(document.getElementsByClassName('detailCharts'))
-
         })
     });
     crisesChart.render();
@@ -423,15 +420,12 @@ function generateDetailsCharts(subData) {
         fundingUnmet.push(Number(unfunded).toFixed(2) * 100);
 
     } //end for
-    $('#refugees').data('chartObj', c3BarLineChart(dates, refugees, lengthCrisis, "Refugees", "Length of crisis", "refugees"));
+    $('#fundings').data('chartObj', generateFundingsCharts(dates, fundingMet, fundingUnmet, lengthCrisis));
     $('#idps').data('chartObj', c3BarLineChart(dates, idps, lengthCrisis, "IDPs", "Length of crisis", "idps"));
     $('#idmcIDPs').data('chartObj', c3BarLineChart(dates, idmcIDPs, lengthCrisis, "IDPs", "Length of crisis", "idmcIDPs"));
-    $('#pop').data('chartObj', generatePopChart(dates, pop, urbanPop, lengthCrisis));
-    $('#fundings').data('chartObj', generateFundingsCharts(dates, fundingMet, fundingUnmet, lengthCrisis));
-    $('#target').data('chartObj', c3SimpleBarChart(dates, targeted, 'target'));
+    $('#target').data('chartObj', c3BarLineChart(dates, targeted, lengthCrisis, "Targeted", "Length of crisis", "target"));
     $('#peopleConcern').data('chartObj', c3BarLineChart(dates, poc, lengthCrisis, "PoC", "Length of crisis", "peopleConcern"));
-    $('#lifeExp').data('chartObj', generateLifeExpChart(dates,lifeExp, "lifeExp"));
-    // $('#affected').data('chartObj', c3SimpleLinechart(dates,affDisaster,affDrougth,affEarthquake,affWildfire,affFlood,affStorms,affTemp,affVol,affWet,"affected"));
+
 } //generateDetailsCharts
 
 function generateLifeExpChart (x, data, bind) {
@@ -594,7 +588,7 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
                 // },
                 tick: {
                     count: 4,
-                    format: d3.format('s'),
+                    format: d3.format(".1f"),
                 },
                 show: false,
                 padding: {
@@ -603,7 +597,15 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
                 show: true
             }
         },
-        legend: { hide: true }
+        legend: { hide: true },
+        tooltip:{
+            format: {
+                value: function(value, ratio, id ){
+                    var format = (id === 'Funded' || id === 'Unmet') ? formatPercent : d3.format("d");
+                    return format(value);
+                }
+            }
+        }
 
     });
 } //generateFundingsCharts
@@ -675,23 +677,21 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
     if (b[0] === "IDPs") {
         typeDefinition = {
             "IDPs": 'bar'
-        };
+        }
     } else if (b[0] === "Refugees") {
         typeDefinition = {
             "Refugees": 'bar'
-        };
+        }
     }else if (b[0] === "Concerned") {
         typeDefinition = {
             "Concerned": 'bar'
         };
+    }else if (b[0] === "Targeted") {
+        typeDefinition = {
+            "Targeted": 'bar'
+        };
     }
-
-    // if (lineLabel === "Length of crisis") {
-    //     axesDefinition = {
-    //         "Length of crisis": 'y2'
-    //     }
-    // }
-
+ 
     return c3.generate({
         bindto: '#'+bind,
         size: {
@@ -729,12 +729,9 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
                 }
             },
             y2: {
-                // label: {
-                //     text: lineLabel,
-                // },
                 tick: {
                     count: 5,
-                    format: d3.format('s'),
+                    format: d3.format(".1f"),
                 },
                 padding: {
                     bottom: 0
@@ -752,6 +749,10 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
 function countrySelected (country) {
     $('#countrySelected h5').html(country);
 } // countrySelected
+
+$('#moreChart1').on('select',function(){
+    console.log($('.monthSelectionList').val());
+});
 
 var lengthCrisisCall = $.ajax({
     type: 'GET',

@@ -5,22 +5,27 @@ body, h1, h2, h3, h4, h5, h6 {
     font-family: 'Source Sans Pro', sans-serif;
 }
 
-h4 h5{
-	padding-left: 10px;
+h5 {
+	font-size: 14px;
+	color: #2E619A;
 }
 h6 {
-	text-align: center;
-	font-size: 14px;
+/*	text-align: center;
+*/	font-size: 13px;
+	color: #2E619A;
+	margin-bottom: 0px;
 }
 .small {
-	padding-top: 20px;
+	padding: 5 0 5 0;
 }
 #desc{
     font-size: 12px;
     text-align: justify;
 }
 
-
+#countrySelected h5 {
+	font-size: 24px;
+}
 #crises{
 	width: 100%;
 }
