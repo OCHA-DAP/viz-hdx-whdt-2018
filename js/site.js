@@ -1,7 +1,8 @@
 // global variables
 var blueColor = '#2E619A';
-redColor
-var redColor = '#CC4B36';
+var greyColor = '#758583';
+var redColor = '#CC4B36',
+    whiteColor = '#ffffff';
 
 var sortData = function(d1, d2) {
     if (d1.key > d2.key) return 1;
@@ -15,6 +16,13 @@ var date_sort = function(d1, d2) {
     return 0;
 }
 
+var formatPercent = function(d){
+    return d + "%";
+}
+
+var formatFloat = function(f){
+    return d3.format(".2f")(f);
+}
 var formatBillion = function (d) {
     return "$" + d +" B";
 };
@@ -23,53 +31,140 @@ var formatMillion = function (d) {
     return "$ " + d +" M";
 };
 
+function genF10 () {
+    d3.csv('data/crises_length.csv', function(crises){
+        var interAarr = ['Number of inter-agency appeals'],
+            avgLCArr = ['Average length of crisis'],
+            yearArr = ['x'];
+        crises.forEach( function(element, index) {
+            yearArr.push(Number(element['year']));
+            interAarr.push(Number(element['Number of inter-agency appeals']));
+            avgLCArr.push(Number(element['Average length of crises']));
+        });
+        c3.generate({
+                bindto: '#chart',
+                data: {
+                    x: 'x',
+                    type: 'line',
+                    columns: [yearArr, avgLCArr, interAarr],
+                    axes:{
+                        'Number of inter-agency appeals': 'y2'
+                    }
+                },
+                color: {
+                    pattern: [redColor, blueColor]
+                },
+                axis: {
+                    x: {
+                        tick: {
+                            centered: true,
+                            outer: false
+                        }
+                    },
+                    y: {
+                        show: false,
+                        tick: {
+                        }
+                    },
+                    y2:{
+                        min: 0,
+                        show: false,
+                        tick: {
+                            // count: 6,
+                        }
+                    }
+                },
+                size: {
+                    height: 190
+                },
+                padding: {left:10, right: 10}
+            });
+    }); //data/crises_length.csv
+    d3.csv('data/data.csv', function(received){
+        //console.log(formatFloat(element['_5_6y']*100))
+        var fundingRq12 = ['1-2 years'],
+            fundingRq34 = ['3-4 years'],
+            fundingRq56 = ['5-6 years'],
+            fundingRq7 = ['> 7 years'],
+            fundingRcv12 = ['1-2 years'],
+            fundingRcv34 = ['3-4 years'],
+            fundingRcv56 = ['5-6 years'],
+            fundingRcv7 = ['> 7 years'],
+            target12 = ['1-2 years'],
+            target34 = ['3-4 years'],
+            target56 = ['5-6 years'],
+            target7 = ['> 7 years'];
+
+        var yearsArr = ['x'],
+            targetedYearsArr = ['x'];
+
+        received.forEach( function(element, index) {
+            if (element['indicator'] === 'Funding Received') {
+                fundingRcv12.push(Number(formatFloat(element['_1_2y']*100)));
+                fundingRcv34.push(Number(formatFloat(element['_3_4y']*100)));
+                fundingRcv56.push(Number(formatFloat(element['_5_6y']*100)));
+                fundingRcv7.push(Number(formatFloat(element['_7y']*100)));
+                yearsArr.push(Number(element['year']));
+            } else if (element['indicator'] === 'Funding Requested') {
+                fundingRq12.push(Number(formatFloat(element['_1_2y']*100)));
+                fundingRq34.push(Number(formatFloat(element['_3_4y']*100)));
+                fundingRq56.push(Number(formatFloat(element['_5_6y']*100)));
+                fundingRq7.push(Number(formatFloat(element['_7y']*100)));
+            } else {
+                targetedYearsArr.push(Number(element['year']));
+                target12.push(Number(formatFloat(element['_7y']*100)));
+                target34.push(Number(formatFloat(element['_7y']*100)));
+                target56.push(Number(formatFloat(element['_7y']*100)));
+                target7.push(Number(formatFloat(element['_7y']*100)));
+            }
+        });
+        //Funding requested chart
+        $('#fundingRequested').data('chartObj', drowSc3tackBarChart(yearsArr, fundingRq12,fundingRq34,fundingRq56,fundingRq7,'fundingRequested'));
+        //Funding received chart
+        $('#fundingReceived').data('chartObj', drowSc3tackBarChart(yearsArr, fundingRcv12,fundingRcv34,fundingRcv56,fundingRcv7,'fundingReceived'));
+        // People targeted
+        $('#peopleTargeted').data('chartObj', drowSc3tackBarChart(targetedYearsArr, target12,target34,target56,target7,'peopleTargeted'));
+    });//data/data.csv
+} //genF10
+
+function drowSc3tackBarChart (x, data, data1, data2, data3, bind) {
+    return c3.generate({
+                bindto: '#'+bind,
+                data: {
+                    x: 'x',
+                    type: 'bar',
+                    columns: [x, data, data1, data2, data3],
+                    groups:[['1-2 years', '3-4 years', '5-6 years', '> 7 years']]
+                },
+                color: {
+                    pattern: [redColor, blueColor, whiteColor, greyColor]
+                },
+                axis: {
+                    x: {
+                        tick: {
+                            centered: true,
+                            outer: false
+                        }
+                    },
+                    y: {
+                        show: false,
+                    }
+                },
+                size: {
+                    height: 190
+                },
+                padding: {left:10, right: 10},
+                tooltip:{
+                    format: {
+                        value: function(value){
+                            return formatPercent(value);
+                        }
+                    }
+                }
+            });
+}//drowSc3tackBarChart
+
 function genererF10(data, fundingData) {
-    var cf = crossfilter(data);
-    var dim = cf.dimension(function(d) {
-        return [d['#date+year'], d['#indicator+name']];
-    });
-    var grp = dim.group().reduceSum(function(d) {
-        return d['#indicator+num'];
-    }).top(Infinity).sort(sortData);
-
-    var interAarr = ['Number of inter-agency appeals'],
-        avgLCArr = ['Average length of crisis'],
-        yearArr = ['x', 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
-    for (var i = 0; i < grp.length; i++) {
-        grp[i].key[1] == 'Average length of crises' ? avgLCArr.push(grp[i].value) : interAarr.push(grp[i].value);
-    }
-
-    c3.generate({
-        bindto: '#chart',
-        data: {
-            x: 'x',
-            type: 'area',
-            columns: [yearArr, avgLCArr, interAarr],
-        },
-        color: {
-            pattern: [blueColor, redColor]
-        },
-        axis: {
-            x: {
-                localtime: false,
-                tick: {
-                    centered: true,
-                    outer: false
-                }
-            },
-            y: {
-                show: true,
-                tick: {
-                    count: 3,
-                    format: d3.format('.2s'),
-                    fit:true
-                }
-            },
-        },
-        size: {
-            height: 180
-        }
-    });
 
     var fundingRq12 = ['Requirement'],
         fundingRq34 = ['Requirement'],
@@ -244,8 +339,8 @@ function genererGraphesDetails(data) {
     crisesChart = dc.barChart('#crises');
 
     crisesChart
-        .width($('.col-md-12').width())
-        .height(150)
+        .width($('#crises').width())
+        .height(190)
         .margins({
             top: 0,
             right: 30,
@@ -676,15 +771,15 @@ var humdevCall = $.ajax({
     dataType: 'json',
 });
 
-$.when(lengthCrisisCall, funding_targetCall, humdevCall).then(function(lengthCrisisArgs, funding_targetArgs, humdevArgs) {
-    var lengthCrisisData = hxlProxyToJSON(lengthCrisisArgs[0]);
-    var funding_targetData = hxlProxyToJSON(funding_targetArgs[0]);
-    var humdevData = hxlProxyToJSON(humdevArgs[0]);
-    genererF10(lengthCrisisData, funding_targetData);
+// $.when(lengthCrisisCall, funding_targetCall, humdevCall).then(function(lengthCrisisArgs, funding_targetArgs, humdevArgs) {
+//     var lengthCrisisData = hxlProxyToJSON(lengthCrisisArgs[0]);
+//     var funding_targetData = hxlProxyToJSON(funding_targetArgs[0]);
+//     var humdevData = hxlProxyToJSON(humdevArgs[0]);
+//     genererF10(lengthCrisisData, funding_targetData);
 
 
-});
-
+// });
+genF10();
 $.when(humdevCall).then(function(humdevArgs) {
     var humdevData = hxlProxyToJSON(humdevArgs);
     genererGraphesDetails(humdevData)

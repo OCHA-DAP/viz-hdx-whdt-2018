@@ -1,6 +1,6 @@
-/*body{
-	background-color: #DDDDDD;
-}*/
+body{
+	background-color: #DBDFD9;
+}
 body, h1, h2, h3, h4, h5, h6 {
     font-family: 'Source Sans Pro', sans-serif;
 }
@@ -12,21 +12,16 @@ h6 {
 	text-align: center;
 	font-size: 14px;
 }
-.small{
-	text-align: center;
-	font-size: 11px;
-	margin: 0 0 0px;
+.small {
+	padding-top: 20px;
 }
-.desc{
-    font-size: 11px;
+#desc{
+    font-size: 12px;
     text-align: justify;
 }
-.header strong{
-	width: 100%;
-	padding-left: 50px;
-}
 
-.charts{
+
+#crises{
 	width: 100%;
 }
 #crises svg g g.axis.x text {
