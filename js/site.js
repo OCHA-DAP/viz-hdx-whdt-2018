@@ -426,6 +426,20 @@ function generateDetailsCharts(subData) {
     $('#target').data('chartObj', c3BarLineChart(dates, targeted, lengthCrisis, "Targeted", "Length of crisis", "target"));
     $('#peopleConcern').data('chartObj', c3BarLineChart(dates, poc, lengthCrisis, "PoC", "Length of crisis", "peopleConcern"));
 
+    $('#moreChart1').on('change',function(){
+        var selection1 = $('#moreChart1').val();
+        // $('#dropdown1Title h6').text(selection1);
+    });
+
+    $('#moreChart2').on('change',function(){
+        var selection1 = $('#moreChart2').val();
+        // $('#dropdown2Title h6').text(selection1);
+    });
+
+    $('#moreChart3').on('change',function(){
+        var selection1 = $('#moreChart3').val();
+        // $('#dropdown3Title h6').text(selection1);
+    });
 } //generateDetailsCharts
 
 function generateLifeExpChart (x, data, bind) {
@@ -749,10 +763,6 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
 function countrySelected (country) {
     $('#countrySelected h5').html(country);
 } // countrySelected
-
-$('#moreChart1').on('select',function(){
-    console.log($('.monthSelectionList').val());
-});
 
 var lengthCrisisCall = $.ajax({
     type: 'GET',

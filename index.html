@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="css/dc.css" />
     <link rel="stylesheet" type="text/css" href="css/leaflet.css" />
     <link rel="stylesheet" type="text/css" href="css/c3.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet">
     <script src="js/jquery.js"></script>
@@ -19,7 +20,6 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/c3.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/site.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
 </head>
 <body>
@@ -61,10 +61,9 @@
             </div><!-- row -->
 
             <div class="row">
-                <div class="col-md-12">
-                    <div class="row">
-                        <p class="small">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi doloremque fuga beatae, ipsum. Quas a sint ipsa laudantium.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi doloremque fuga beatae, ipsum. Quas a sint ipsa laudantium.Animi doloremque fuga beatae, ipsum. Quas a sint ipsa laudantium.</p>
-                    </div>
+                <div class="col-md-12" id="crisesChart">
+                    <h5>Crises by number of appeal</h5>
+                        <p class="small">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi doloremque fuga beatae, ipsum. Quas a sint ipsa laudantium.Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
                     <div class="row">
                         <div id="crises"></div>
                     </div>
@@ -81,7 +80,6 @@
                     <div class="row">
                         <div class="col-md-12">
                             <h6>Fundings</h6>
-                            <p class="small">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi error eaque quasi nihil.</p>
                             <div id="fundings"></div>
                         </div>
                     </div>
@@ -90,7 +88,6 @@
                     <div class="row">
                         <div class="col-md-12">
                             <h6>People targeted</h6>
-                            <p class="small">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
                             <div id="target"></div>
                         </div>
                     </div>
@@ -100,8 +97,17 @@
                 <div class="col-md-4">
                     <div class="row">
                         <div class="col-md-12">
-                            <h6>Population of concern (UNHCR)</h6>
-                            <p class="small">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi error eaque quasi nihil.</p>
+                            <div class="row">
+                                <div class="col-md-10" id="dropdown1Title">
+                                    <h6>Population of concern (UNHCR)</h6>
+                                </div>
+                                <div class="col-md-2">
+                                    <select id="moreChart1" class="selectpicker">
+                                        <option value="indicator1">Indicator 1</option>
+                                        <option value="indicator2">Indicator 2</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div id="peopleConcern"></div>
                         </div>
                     </div>
@@ -109,8 +115,17 @@
                 <div class="col-md-4">
                     <div class="row">
                         <div class="col-md-12">
-                            <h6>Internal Displaced People (UNHRC).</h6>
-                            <p class="small">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi error eaque quasi nihil.</p>
+                            <div class="row">
+                                <div class="col-md-10" id="dropdown2Title">
+                                    <h6>Internal Displaced People (UNHRC)</h6>
+                                </div>
+                                <div class="col-md-2">
+                                     <select id="moreChart2" class="selectpicker">
+                                        <option value="indicator1">Indicator 1</option>
+                                        <option value="indicator2">Indicator 2</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div id="idps"></div>
                         </div>
                     </div>
@@ -118,61 +133,29 @@
                 <div class="col-md-4">
                     <div class="row">
                         <div class="col-md-12">
-                            <h6>Internal Displaced People (IDMC)</h6>
-                            <p class="small">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi error eaque quasi nihil.</p>
+                            <div class="row">
+                                <div class="col-md-10" id="dropdown3Title">
+                                    <h6>Internal Displaced People (IDMC)</h6>
+                                </div>
+                                <div class="col-md-2">
+                                     <select id="moreChart3" class="selectpicker">
+                                        <option value="indicator1">Indicator 1</option>
+                                        <option value="indicator2">Indicator 2</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div id="idmcIDPs"></div>
                         </div>
                     </div>
                 </div><!-- col-md-4 -->
             </div><!-- row -->
-
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h5>More dev related</h5>
-                            <select class="selectpicker" id="moreChart1">
-                                <option>Indicator 1</option>
-                                <option>Indicator 2</option>
-                                <option>Indicator 3</option>
-                                <option>Indicator 4</option>
-                                <option>Indicator 5</option>
-                                <option>Indicator 6</option>
-                            </select>
-                        </div>
-                    </div>
-                </div><!-- col-md-4 -->
-                <div class="col-md-4">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <select name="select2" id="moreChart2">
-                                <option value="value1">Indicator 1</option>
-                                <option value="value2">Indicator 2</option>
-                                <option value="value3">Indicator 3</option>
-                                <option value="value4">Indicator 4</option>
-                                <option value="value5">Indicator 5</option>
-                                <option value="value6">Indicator 6</option>
-                            </select>
-                        </div>
-                    </div>
-                </div><!-- col-md-4 -->
-                <div class="col-md-4">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <select name="select3" id="moreChar3t">
-                                <option value="value1">Indicator 1</option>
-                                <option value="value2">Indicator 2</option>
-                                <option value="value3">Indicator 3</option>
-                                <option value="value4">Indicator 4</option>
-                                <option value="value5">Indicator 5</option>
-                                <option value="value6">Indicator 6</option>
-                            </select>
-                        </div>
-                    </div>
-                </div><!-- col-md-4 -->
-            </div><!-- row -->
-
         </div><!-- row -->
+
+        <div class="row">
+            <div class="footer">
+            </div>
+        </div><!-- row -->
+
     </div> <!-- container-->
     <script src="js/site.js"></script>
     <!-- insert google analytics code -->
