@@ -112,9 +112,9 @@ function genF10 () {
                 fundingRq7.push(Number(formatFloat(element['_7y']*100)));
             } else {
                 targetedYearsArr.push(Number(element['year']));
-                target12.push(Number(formatFloat(element['_7y']*100)));
-                target34.push(Number(formatFloat(element['_7y']*100)));
-                target56.push(Number(formatFloat(element['_7y']*100)));
+                target12.push(Number(formatFloat(element['_1_2y']*100)));
+                target34.push(Number(formatFloat(element['_3_4y']*100)));
+                target56.push(Number(formatFloat(element['_5_6y']*100)));
                 target7.push(Number(formatFloat(element['_7y']*100)));
             }
         });
@@ -367,158 +367,131 @@ function genererGraphesDetails(data) {
 } //genererGraphesDetails
 
 function generateDetailsCharts(subData) {
-    var pop = ['Population'],
-        urbanPop = ['Urban'],
+    var poc = ['Concerned'],
+        refugees = ['Value'],
+        pin = ['Value'],
         idps = ['IDPs'],
         idmcIDPs = ['IDPs'],
-        refugees = ['Refugees'],
+        gha = ['Value'],
+
         targeted = ['Targeted'],
-        poc = ['Concerned'],
         dates = ['x'],
         lengthCrisis = ['Length of crisis'],
         fundingMet = ['Funded'],
         fundingUnmet = ['Unmet'],
+
+        pop = ['Value'],
         lifeExp = ['Life expectancy'],
-        affDisaster = ['Disasters'],
-        affDrougth = ['Drought'],
-        affEarthquake = ['Earthquake'],
-        affWildfire = ['Wildfire'],
-        affFlood = ['Flood'],
-        affStorms = ['Storms'],
-        affTemp = ['Temperature'],
-        affVol = ['volcanoes'],
-        affWet = ['Wet'];
+        gdpGrowth = ['Value'],
+        mobileSubs = ['Value'],
+        mortality = ['Value'],
+        literacy = ['Value'],
+        primCompletion = ['Value'],
+
+        affDisaster = ['Value'],
+        affDrougth = ['Value'],
+        affEarthquake = ['Value'],
+        affFlood = ['Value'],
+        affTemp = ['Value'],
+        affVol = ['Value'],
+        affWet = ['Value'];
 
     for (d in subData) {
-        // console.log(subData[d])
         dates.push(Number(subData[d]['#date+year']));
         lengthCrisis.push(parseInt(subData[d]['#indicator+length_crisis']));
+        targeted.push(Number(subData[d]['#inneed+targeted']));
 
         pop.push(Number(subData[d]['#population+total']));
-        urbanPop.push(Number(subData[d]['#population+urban']));
-        targeted.push(Number(subData[d]['#inneed+targeted']));
-        poc.push(Number(subData[d]['#inneed+concerned+unhrc']));
-
-        lifeExp.push(Number(subData[d]['#indicator+life_expec']));
-
         refugees.push(Number(subData[d]['#inneed+refugees+unhrc']));
+        pin.push(Number(subData[d]['#inneed+total']));
         idps.push(Number(subData[d]['#inneed+idps+unhrc']));
         idmcIDPs.push(subData[d]['#inneed+idmc+idps']);
+        // gha.push(subData[d]['#inneed+idmc+idps']);
+
+        poc.push(Number(subData[d]['#inneed+concerned+unhrc']));
+        lifeExp.push(Number(subData[d]['#indicator+life_expec']));
+        primCompletion.push(formatFloat(Number(subData[d]['#indicator+primary_completion'])));
+        gdpGrowth.push(Number(subData[d]['#indicator+gdp_growth']));
+        mobileSubs.push(formatFloat(Number(subData[d]['#indicator+mobile_pct'])));
+        literacy.push(formatFloat(Number(subData[d]['#indicator+literacy'])));
+        mortality.push(Number(subData[d]['#indicator+under5_mort']));
 
         affDisaster.push(Number(subData[d]['#affected+natural_disasters+total']));
         affDrougth.push(Number(subData[d]['#affected+drought+total']));
         affEarthquake.push(Number(subData[d]['#affected+earthquake+total']));
-        affWildfire.push(Number(subData[d]['#affected+wildfire+total']));
         affFlood.push(Number(subData[d]['#affected+flood+total']));
-        affStorms.push(Number(subData[d]['#affected+storms+total']));
         affTemp.push(Number(subData[d]['#affected+temperature+total']));
         affVol.push(Number(subData[d]['#affected+volcanoes+total']));
         affWet.push(Number(subData[d]['#affected+wet+total']));
 
         let unfunded = (Number(subData[d]['#funding+requirements']) - Number(subData[d]['#funding+received'])) / Number(subData[d]['#funding+requirements'])
-        fundingMet.push(Number(subData[d]['#indicator+requirements_met']).toFixed(2) * 100);
-        fundingUnmet.push(Number(unfunded).toFixed(2) * 100);
+        fundingMet.push(formatFloat(Number(subData[d]['#indicator+requirements_met']))*100);
+        fundingUnmet.push(Number(formatFloat(unfunded*100)));
 
     } //end for
+
     $('#fundings').data('chartObj', generateFundingsCharts(dates, fundingMet, fundingUnmet, lengthCrisis));
-    $('#idps').data('chartObj', c3BarLineChart(dates, idps, lengthCrisis, "IDPs", "Length of crisis", "idps"));
-    $('#idmcIDPs').data('chartObj', c3BarLineChart(dates, idmcIDPs, lengthCrisis, "IDPs", "Length of crisis", "idmcIDPs"));
-    $('#target').data('chartObj', c3BarLineChart(dates, targeted, lengthCrisis, "Targeted", "Length of crisis", "target"));
-    $('#peopleConcern').data('chartObj', c3BarLineChart(dates, poc, lengthCrisis, "PoC", "Length of crisis", "peopleConcern"));
+    $('#idps').data('chartObj', c3BarLineChart(dates, idps, lengthCrisis, "idps"));
+    $('#target').data('chartObj', c3BarLineChart(dates, targeted, lengthCrisis, "target"));
+
+    $('#peopleConcern').data('chartObj', c3BarLineChart(dates, poc, lengthCrisis, "peopleConcern"));
+    $('#pop').data('chartObj', c3BarLineChart(dates, pop, lengthCrisis, "pop"));
+    $('#disasters').data('chartObj', c3BarLineChart(dates, affDisaster, lengthCrisis, "disasters"));
+
+    // var selection1 = $('#moreChart1 option:selected').text();
+    // var selection2 = $('#moreChart2 option:selected').text();
+    // var selection3 = $('#moreChart3 option:selected').text();
+    $('#dropdown1Title h6').text("Population of concern (UNHCR)");
+    $('#dropdown2Title h6').text("Affected by natural disasters");
+    $('#dropdown3Title h6').text("Total Population");
+
+    var dropdown1DataMapping = {},
+        dropdown2DataMapping = {},
+        dropdown3DataMapping = {};
+
+        dropdown1DataMapping['indicator1'] = {'data': poc};
+        dropdown1DataMapping['indicator2'] = {'data': refugees};
+        dropdown1DataMapping['indicator3'] = {'data': pin};
+        dropdown1DataMapping['indicator4'] = {'data': idps};
+        dropdown1DataMapping['indicator5'] = {'data': idmcIDPs};
+        // dropdown1DataMapping['indicator6'] = {'data': gha};
+
+        dropdown2DataMapping['indicator1'] = {'data': affDisaster};
+        dropdown2DataMapping['indicator2'] = {'data': affDrougth};
+        dropdown2DataMapping['indicator3'] = {'data': affEarthquake};
+        dropdown2DataMapping['indicator4'] = {'data': affFlood};
+        dropdown2DataMapping['indicator5'] = {'data': affTemp};
+        dropdown2DataMapping['indicator6'] = {'data': affVol};
+
+        dropdown3DataMapping['indicator1'] = {'data': pop};
+        dropdown3DataMapping['indicator2'] = {'data': lifeExp};
+        dropdown3DataMapping['indicator3'] = {'data': gdpGrowth};
+        dropdown3DataMapping['indicator4'] = {'data': mobileSubs};
+        dropdown3DataMapping['indicator5'] = {'data': mortality};
+        dropdown3DataMapping['indicator6'] = {'data': literacy};
+        dropdown3DataMapping['indicator7'] = {'data': primCompletion};
 
     $('#moreChart1').on('change',function(){
-        var selection1 = $('#moreChart1').val();
-        // $('#dropdown1Title h6').text(selection1);
+        selection1 = $('#moreChart1 option:selected').text();
+        var select1Value = $('#moreChart1 option:selected').val();
+        $('#dropdown1Title h6').text(selection1);
+        $('#peopleConcern').data('chartObj', c3BarLineChart(dates, dropdown1DataMapping[select1Value].data, lengthCrisis, "peopleConcern"));
     });
 
     $('#moreChart2').on('change',function(){
-        var selection1 = $('#moreChart2').val();
-        // $('#dropdown2Title h6').text(selection1);
+        selection2 = $('#moreChart2 option:selected').text();
+        var select2Value = $('#moreChart2 option:selected').val();
+        $('#dropdown2Title h6').text(selection2);
+        $('#disasters').data('chartObj', c3BarLineChart(dates, dropdown2DataMapping[select2Value].data, lengthCrisis, "disasters"));
     });
 
     $('#moreChart3').on('change',function(){
-        var selection1 = $('#moreChart3').val();
-        // $('#dropdown3Title h6').text(selection1);
+        selection3 = $('#moreChart3 option:selected').text();
+        var select3Value = $('#moreChart3 option:selected').val();
+        $('#dropdown3Title h6').text(selection3);
+        $('#pop').data('chartObj', c3BarLineChart(dates, dropdown3DataMapping[select3Value].data, lengthCrisis, "pop"));
     });
 } //generateDetailsCharts
-
-function generateLifeExpChart (x, data, bind) {
-    return c3.generate({
-        bindto: '#' + bind,
-        data: {
-            x: 'x',
-            columns: [x, data],
-            type: 'area',
-        },
-        color: {
-            pattern: [blueColor]
-        },
-        axis: {
-            y: {
-                show: true,
-                tick: {
-                    count: 4,
-                    format: d3.format('.2s'),
-                },
-            },
-            x: {
-                tick: {
-                    centered: true,
-                    outer: false
-                }
-            }
-        },
-        size: {
-            height: 180
-        },
-        legend: {
-            hide: true
-        }
-    });
-} //c3SimpleLinechart
-
-function c3SimpleLinechart (x, data, bind) {
-    let cols = [];
-    if (arguments.length > 3) {
-        for (var i = 0; i < arguments.length-1; i++) {
-            cols.push(arguments[i])
-        }
-    } else {
-        cols = [x, arguments[1]];
-    }
-    return c3.generate({
-        bindto: '#' + bind,
-        data: {
-            x: 'x',
-            columns: cols,
-            type: 'line',
-        },
-        color: {
-            pattern: [blueColor]
-        },
-        axis: {
-            y: {
-                show: true,
-                tick: {
-                    count: 4,
-                    format: d3.format('.2s'),
-                },
-            },
-            x: {
-                tick: {
-                    centered: true,
-                    outer: false
-                }
-            }
-        },
-        size: {
-            height: 180
-        },
-        legend: {
-            hide: true
-        }
-    });
-} //c3SimpleLinechart
 
 function c3SimpleBarChart(x, data, bind) {
     return c3.generate({
@@ -624,77 +597,18 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
     });
 } //generateFundingsCharts
 
-function generatePopChart(dates, pop, urban, lgth) {
-    return c3.generate({
-        bindto: '#pop',
-        size: {
-            height: 180,
-            width: 400
-        },
-        color: {
-            pattern: [blueColor, redColor, redColor]
-        },
-        data: {
-            x: 'x',
-            columns: [dates, pop, urban, lgth],
-            axes: {
-                'Length of crisis': 'y2'
-            },
-            types: {
-                'Urban': 'bar',
-                'Population': 'bar'
-            }
-        },
-        axis: {
-            x: {
-                tick: {
-                    centered: true,
-                    outer: false
-                }
-            },
-            y: {
-                // label: {
-                //     text: 'Population',
-                // },
-                tick: {
-                    count: 4,
-                    format: d3.format('.3s'),
-                },
-                min: 0,
-                padding: {
-                    bottom: 0
-                }
-            },
-            y2: {
-                // label: {
-                //     text: 'Urban',
-                // },
-                tick: {
-                    count: 4,
-                    format: d3.format('s'),
-                },
-                // min: 0,
-                padding: {
-                    bottom: 0
-                },
-                show: true
-            }
-        },
-        legend: { hide: true }
-    });
-} //generatePopChart
 
-function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
-    let typeDefinition,
+function c3BarLineChart(x, b, l, bind) {
+    let typeDefinition = {"Value": 'bar'},
         axesDefinition = {"Length of crisis": 'y2'};
 
     if (b[0] === "IDPs") {
         typeDefinition = {
             "IDPs": 'bar'
         }
-    } else if (b[0] === "Refugees") {
+    } else if (b[0] === "Life expectancy") {
         typeDefinition = {
-            "Refugees": 'bar'
+            "Life expectancy": 'bar'
         }
     }else if (b[0] === "Concerned") {
         typeDefinition = {
@@ -705,7 +619,7 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
             "Targeted": 'bar'
         };
     }
- 
+
     return c3.generate({
         bindto: '#'+bind,
         size: {
@@ -729,10 +643,6 @@ function c3BarLineChart(x, b, l, barLabel, lineLabel, bind) {
                 }
             },
             y: {
-                // label: {
-                //     text: barLabel,
-                //     // position: 'outer-middle'
-                // },
                 tick: {
                     count: 4,
                     format: d3.format('.3s'),
@@ -782,14 +692,6 @@ var humdevCall = $.ajax({
     dataType: 'json',
 });
 
-// $.when(lengthCrisisCall, funding_targetCall, humdevCall).then(function(lengthCrisisArgs, funding_targetArgs, humdevArgs) {
-//     var lengthCrisisData = hxlProxyToJSON(lengthCrisisArgs[0]);
-//     var funding_targetData = hxlProxyToJSON(funding_targetArgs[0]);
-//     var humdevData = hxlProxyToJSON(humdevArgs[0]);
-//     genererF10(lengthCrisisData, funding_targetData);
-
-
-// });
 genF10();
 $.when(humdevCall).then(function(humdevArgs) {
     var humdevData = hxlProxyToJSON(humdevArgs);
