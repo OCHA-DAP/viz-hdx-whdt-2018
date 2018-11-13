@@ -360,6 +360,7 @@ function genererGraphesDetails(data) {
             $('.detailCharts').show();
             countrySelected(d.x);
             generateDetailsCharts(crisesDim.filter(d.x).top(Infinity).sort(date_sort));
+            window.scrollTo(0,document.body.scrollHeight);
         })
     });
     crisesChart.render();
@@ -623,7 +624,7 @@ function c3BarLineChart(x, b, l, bind) {
     return c3.generate({
         bindto: '#'+bind,
         size: {
-            height: 180,
+            height: 190,
             width: 400
         },
         color: {
