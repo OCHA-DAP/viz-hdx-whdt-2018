@@ -1,5 +1,7 @@
 body{
 	background-color: #DBDFD9;
+/*	padding-left: 5px;
+	padding-right: 5px;*/
 }
 body, h1, h2, h3, h4, h5, h6 {
     font-family: 'Source Sans Pro', sans-serif;
@@ -14,6 +16,7 @@ h6 {
 	font-size: 15px;
 	color: #2E619A;
 	margin-bottom: 10px;
+    height: 30px;
 }
 
 #desc{
@@ -33,9 +36,9 @@ h6 {
     text-anchor: end !important;
     transform: rotate(-30deg);
 }
-#crises svg g g.axis.y {
+/*#crises svg g g.axis.y {
     display: none;
-}
+}*/
 
 .detailCharts {
 	display: none;
@@ -44,4 +47,12 @@ h6 {
 .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
 	width:0px;
 	margin-top: 10px;
+}
+.d3-tip {
+    padding: 5px;
+    background-color: '#007A45';
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    font-size: 14px;
 }
