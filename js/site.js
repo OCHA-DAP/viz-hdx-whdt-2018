@@ -430,9 +430,9 @@ function generateDetailsCharts(subData) {
     $('#disasters').data('chartObj', c3BarLineChart(dates, affDisaster, "disasters"));
     $('#pop').data('chartObj', c3BarLineChart(dates, mortality, "pop"));
 
-    $('#dropdown1Title h6').text($('#moreChart1 option:selected').text());
-    $('#dropdown2Title h6').text($('#moreChart2 option:selected').text());
-    $('#dropdown3Title h6').text($('#moreChart3 option:selected').text());
+    $('#dropdown1Title h6').text($('#moreChart1 option').eq(0).text());
+    $('#dropdown2Title h6').text($('#moreChart2 option').eq(0).text());
+    $('#dropdown3Title h6').text($('#moreChart3 option').eq(0).text());
 
     var dropdown1DataMapping = {},
         dropdown2DataMapping = {},
