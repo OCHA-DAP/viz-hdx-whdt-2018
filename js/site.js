@@ -27,9 +27,13 @@ var formatBillion = function (d) {
     return "$" + d +" B";
 };
 
-var formatMillion = function (d) {
-    return "$ " + d3.format(",")(d);
+var formatFundings = function (d) {
+    return d3.format(",")(d) + " US$ billion";
 };
+
+var formatMM = function(d){
+    return d3.format(",")(d) + " Million";
+}
 
 //tooltip bar
 var bartip = d3.tip().attr('class', 'd3-tip').html(function (d) {
@@ -106,22 +110,22 @@ function genF10 () {
 
         received.forEach( function(element, index) {
             if (element['indicator'] === 'Funding Received') {
-                fundingRcv12.push(Number(formatFloat(element['_1_2y']*100)));
-                fundingRcv34.push(Number(formatFloat(element['_3_4y']*100)));
-                fundingRcv56.push(Number(formatFloat(element['_5_6y']*100)));
-                fundingRcv7.push(Number(formatFloat(element['_7y']*100)));
+                fundingRcv12.push(formatFloat(Number(element['_1_2y'])));
+                fundingRcv34.push(formatFloat(Number(element['_3_4y'])));
+                fundingRcv56.push(formatFloat(Number(element['_5_6y'])));
+                fundingRcv7.push(formatFloat(Number(element['_7y'])));
                 yearsArr.push(Number(element['year']));
             } else if (element['indicator'] === 'Funding Requested') {
-                fundingRq12.push(Number(formatFloat(element['_1_2y']*100)));
-                fundingRq34.push(Number(formatFloat(element['_3_4y']*100)));
-                fundingRq56.push(Number(formatFloat(element['_5_6y']*100)));
-                fundingRq7.push(Number(formatFloat(element['_7y']*100)));
+                fundingRq12.push(formatFloat(Number(element['_1_2y'])));
+                fundingRq34.push(formatFloat(Number(element['_3_4y'])));
+                fundingRq56.push(formatFloat(Number(element['_5_6y'])));
+                fundingRq7.push(formatFloat(Number(element['_7y'])));
             } else {
                 targetedYearsArr.push(Number(element['year']));
-                target12.push(Number(formatFloat(element['_1_2y']*100)));
-                target34.push(Number(formatFloat(element['_3_4y']*100)));
-                target56.push(Number(formatFloat(element['_5_6y']*100)));
-                target7.push(Number(formatFloat(element['_7y']*100)));
+                target12.push(formatFloat(Number(element['_1_2y'])));
+                target34.push(formatFloat(Number(element['_3_4y'])));
+                target56.push(formatFloat(Number(element['_5_6y'])));
+                target7.push(formatFloat(Number(element['_7y'])));
             }
         });
         //Funding requested chart
@@ -163,7 +167,7 @@ function drowSc3tackBarChart (x, data, data1, data2, data3, bind) {
                 tooltip:{
                     format: {
                         value: function(value){
-                            return formatPercent(value);
+                            return d3.format(",")(value);
                         }
                     }
                 }
