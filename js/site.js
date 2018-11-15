@@ -28,8 +28,14 @@ var formatBillion = function (d) {
 };
 
 var formatMillion = function (d) {
-    return "$ " + d +" M";
+    return "$ " + d3.format(",")(d);
 };
+
+//tooltip bar
+var bartip = d3.tip().attr('class', 'd3-tip').html(function (d) {
+    return d.data.key + ': ' + d3.format('0,000')(d.y);
+
+});
 
 function genF10 () {
     d3.csv('data/crises_length.csv', function(crises){
@@ -333,26 +339,27 @@ function genererGraphesDetails(data) {
     crisesDim = cf.dimension(function(d) {
         return d['#country+name'];
     });
-    crisesGroup = crisesDim.group().reduceSum(function(d) {
-        return d['#indicator+length_crisis'];
-    });
+    crisesGroup = crisesDim.group().reduceCount();
     crisesChart = dc.barChart('#crises');
 
     crisesChart
         .width($('#crises').width())
         .height(190)
         .margins({
-            top: 0,
+            top: 5,
             right: 30,
             bottom: 80,
             left: 30
         })
         .x(d3.scale.ordinal())
         .xUnits(dc.units.ordinal)
+        .renderHorizontalGridLines(true)
+        .elasticY(true)
         .colors(blueColor)
         .dimension(crisesDim)
         .group(crisesGroup)
-        .brushOn(false);
+        .brushOn(false)
+        .yAxis().ticks(4);
 
     crisesChart.renderlet(function(chart) {
         chart.selectAll("rect.bar").on("click", function(d) {
@@ -363,191 +370,132 @@ function genererGraphesDetails(data) {
             window.scrollTo(0,document.body.scrollHeight);
         })
     });
-    crisesChart.render();
-
+    dc.renderAll();
+    d3.selectAll('.bar').call(bartip);
+    d3.selectAll('.bar').on('mouseover', bartip.show).on('mouseout', bartip.hide);
 } //genererGraphesDetails
 
 function generateDetailsCharts(subData) {
-    var poc = ['Concerned'],
-        refugees = ['Value'],
-        pin = ['Value'],
-        idps = ['IDPs'],
+    let poc = ['People of concern'],
+        refugees = ['Refugees'],
         idmcIDPs = ['IDPs'],
-        gha = ['Value'],
 
         targeted = ['Targeted'],
         dates = ['x'],
-        lengthCrisis = ['Length of crisis'],
-        fundingMet = ['Funded'],
-        fundingUnmet = ['Unmet'],
+        targetedXaxis = ['x'],
+        lengthCrisis = ['Consecutive length of appeals'],
+        fundingReq = ['Funding requested'],
+        fundingReceiv = ['Funding received'],
 
-        pop = ['Value'],
         lifeExp = ['Life expectancy'],
-        gdpGrowth = ['Value'],
-        mobileSubs = ['Value'],
-        mortality = ['Value'],
-        literacy = ['Value'],
-        primCompletion = ['Value'],
+        mortality = ['Rate'],
+        literacy = ['Rate'],
+        primCompletion = ['Rate'],
+        malnut = ['Rate'],
 
-        affDisaster = ['Value'],
-        affDrougth = ['Value'],
-        affEarthquake = ['Value'],
-        affFlood = ['Value'],
-        affTemp = ['Value'],
-        affVol = ['Value'],
-        affWet = ['Value'];
+        affDisaster = ['Affected'],
+        pop = ['Population'],
+        urbanPop = ['Rate'];
 
     for (d in subData) {
+        Number(subData[d]['#date+year']) >=2011 ? targetedXaxis.push(Number(subData[d]['#date+year'])): null;
         dates.push(Number(subData[d]['#date+year']));
         lengthCrisis.push(parseInt(subData[d]['#indicator+length_crisis']));
         targeted.push(Number(subData[d]['#inneed+targeted']));
 
         pop.push(Number(subData[d]['#population+total']));
-        refugees.push(Number(subData[d]['#inneed+refugees+unhrc']));
-        pin.push(Number(subData[d]['#inneed+total']));
-        idps.push(Number(subData[d]['#inneed+idps+unhrc']));
-        idmcIDPs.push(subData[d]['#inneed+idmc+idps']);
-        // gha.push(subData[d]['#inneed+idmc+idps']);
+        urbanPop.push(Number(subData[d]['#population+percent+urban']));
+        affDisaster.push(Number(subData[d]['#affected+natural_disasters+total']));
 
         poc.push(Number(subData[d]['#inneed+concerned+unhrc']));
+        refugees.push(Number(subData[d]['#inneed+refugees+unhrc']));
+        idmcIDPs.push(subData[d]['#inneed+idmc+idps']);
+
+
         lifeExp.push(Number(subData[d]['#indicator+life_expec']));
         primCompletion.push(formatFloat(Number(subData[d]['#indicator+primary_completion'])));
-        gdpGrowth.push(Number(subData[d]['#indicator+gdp_growth']));
-        mobileSubs.push(formatFloat(Number(subData[d]['#indicator+mobile_pct'])));
         literacy.push(formatFloat(Number(subData[d]['#indicator+literacy'])));
-        mortality.push(Number(subData[d]['#indicator+under5_mort']));
+        mortality.push(formatFloat(Number(subData[d]['#indicator+under5_mort'])));
+        malnut.push(formatFloat(Number(subData[d]['#indicator+under5_underweight'])));
 
-        affDisaster.push(Number(subData[d]['#affected+natural_disasters+total']));
-        affDrougth.push(Number(subData[d]['#affected+drought+total']));
-        affEarthquake.push(Number(subData[d]['#affected+earthquake+total']));
-        affFlood.push(Number(subData[d]['#affected+flood+total']));
-        affTemp.push(Number(subData[d]['#affected+temperature+total']));
-        affVol.push(Number(subData[d]['#affected+volcanoes+total']));
-        affWet.push(Number(subData[d]['#affected+wet+total']));
-
-        let unfunded = (Number(subData[d]['#funding+requirements']) - Number(subData[d]['#funding+received'])) / Number(subData[d]['#funding+requirements'])
-        fundingMet.push(formatFloat(Number(subData[d]['#indicator+requirements_met']))*100);
-        fundingUnmet.push(Number(formatFloat(unfunded*100)));
+        fundingReq.push(Number(subData[d]['#funding+requirements']));
+        fundingReceiv.push(Number(subData[d]['#funding+received']));
 
     } //end for
+    $('#fundings').data('chartObj', generateFundingsCharts(dates, fundingReq, fundingReceiv, lengthCrisis));
+    $('#target').data('chartObj', c3BarLineChart(dates, targeted, "target"));
+    // c3BarLineChart(dates, targeted, "target");
 
-    $('#fundings').data('chartObj', generateFundingsCharts(dates, fundingMet, fundingUnmet, lengthCrisis));
-    $('#idps').data('chartObj', c3BarLineChart(dates, idps, lengthCrisis, "idps"));
-    $('#target').data('chartObj', c3BarLineChart(dates, targeted, lengthCrisis, "target"));
+    $('#peopleConcern').data('chartObj', c3BarLineChart(dates, idmcIDPs, "peopleConcern"));
+    $('#disasters').data('chartObj', c3BarLineChart(dates, affDisaster, "disasters"));
+    $('#pop').data('chartObj', c3BarLineChart(dates, mortality, "pop"));
 
-    $('#peopleConcern').data('chartObj', c3BarLineChart(dates, poc, lengthCrisis, "peopleConcern"));
-    $('#pop').data('chartObj', c3BarLineChart(dates, pop, lengthCrisis, "pop"));
-    $('#disasters').data('chartObj', c3BarLineChart(dates, affDisaster, lengthCrisis, "disasters"));
-
-    // var selection1 = $('#moreChart1 option:selected').text();
-    // var selection2 = $('#moreChart2 option:selected').text();
-    // var selection3 = $('#moreChart3 option:selected').text();
-    $('#dropdown1Title h6').text("Population of concern (UNHCR)");
-    $('#dropdown2Title h6').text("Affected by natural disasters");
-    $('#dropdown3Title h6').text("Total Population");
+    $('#dropdown1Title h6').text($('#moreChart1 option:selected').text());
+    $('#dropdown2Title h6').text($('#moreChart2 option:selected').text());
+    $('#dropdown3Title h6').text($('#moreChart3 option:selected').text());
 
     var dropdown1DataMapping = {},
         dropdown2DataMapping = {},
         dropdown3DataMapping = {};
 
-        dropdown1DataMapping['indicator1'] = {'data': poc};
+        dropdown1DataMapping['indicator1'] = {'data': idmcIDPs};
         dropdown1DataMapping['indicator2'] = {'data': refugees};
-        dropdown1DataMapping['indicator3'] = {'data': pin};
-        dropdown1DataMapping['indicator4'] = {'data': idps};
-        dropdown1DataMapping['indicator5'] = {'data': idmcIDPs};
-        // dropdown1DataMapping['indicator6'] = {'data': gha};
+        dropdown1DataMapping['indicator3'] = {'data': poc};
 
         dropdown2DataMapping['indicator1'] = {'data': affDisaster};
-        dropdown2DataMapping['indicator2'] = {'data': affDrougth};
-        dropdown2DataMapping['indicator3'] = {'data': affEarthquake};
-        dropdown2DataMapping['indicator4'] = {'data': affFlood};
-        dropdown2DataMapping['indicator5'] = {'data': affTemp};
-        dropdown2DataMapping['indicator6'] = {'data': affVol};
+        dropdown2DataMapping['indicator2'] = {'data': pop};
+        dropdown2DataMapping['indicator3'] = {'data': urbanPop};
 
-        dropdown3DataMapping['indicator1'] = {'data': pop};
+        dropdown3DataMapping['indicator1'] = {'data': mortality};
         dropdown3DataMapping['indicator2'] = {'data': lifeExp};
-        dropdown3DataMapping['indicator3'] = {'data': gdpGrowth};
-        dropdown3DataMapping['indicator4'] = {'data': mobileSubs};
-        dropdown3DataMapping['indicator5'] = {'data': mortality};
-        dropdown3DataMapping['indicator6'] = {'data': literacy};
-        dropdown3DataMapping['indicator7'] = {'data': primCompletion};
+        dropdown3DataMapping['indicator3'] = {'data': primCompletion};
+        dropdown3DataMapping['indicator4'] = {'data': malnut};
+        dropdown3DataMapping['indicator5'] = {'data': literacy};
 
     $('#moreChart1').on('change',function(){
         selection1 = $('#moreChart1 option:selected').text();
         var select1Value = $('#moreChart1 option:selected').val();
         $('#dropdown1Title h6').text(selection1);
-        $('#peopleConcern').data('chartObj', c3BarLineChart(dates, dropdown1DataMapping[select1Value].data, lengthCrisis, "peopleConcern"));
+        $('#peopleConcern').data('chartObj', c3BarLineChart(dates, dropdown1DataMapping[select1Value].data, "peopleConcern"));
     });
 
     $('#moreChart2').on('change',function(){
         selection2 = $('#moreChart2 option:selected').text();
         var select2Value = $('#moreChart2 option:selected').val();
         $('#dropdown2Title h6').text(selection2);
-        $('#disasters').data('chartObj', c3BarLineChart(dates, dropdown2DataMapping[select2Value].data, lengthCrisis, "disasters"));
+        $('#disasters').data('chartObj', c3BarLineChart(dates, dropdown2DataMapping[select2Value].data, "disasters"));
     });
 
     $('#moreChart3').on('change',function(){
         selection3 = $('#moreChart3 option:selected').text();
         var select3Value = $('#moreChart3 option:selected').val();
         $('#dropdown3Title h6').text(selection3);
-        $('#pop').data('chartObj', c3BarLineChart(dates, dropdown3DataMapping[select3Value].data, lengthCrisis, "pop"));
+        $('#pop').data('chartObj', c3BarLineChart(dates, dropdown3DataMapping[select3Value].data, "pop"));
     });
 } //generateDetailsCharts
 
-function c3SimpleBarChart(x, data, bind) {
-    return c3.generate({
-        bindto: '#' + bind,
-        data: {
-            x: 'x',
-            columns: [x, data],
-            type: 'bar',
-        },
-        color: {
-            pattern: [blueColor]
-        },
-        axis: {
-            y: {
-                show: true,
-                tick: {
-                    count: 4,
-                    format: d3.format('.2s'),
-                },
-            },
-            x: {
-                tick: {
-                    centered: true,
-                    outer: false
-                }
-            }
-        },
-        size: {
-            height: 180
-        },
-        legend: { hide: true }
-    });
-} //c3SimpleBarChart
 
-function generateFundingsCharts(x, funded, unfunded, lgth) {
+function generateFundingsCharts(x, req, receiv, lgth) {
     return c3.generate({
         bindto: '#fundings',
         size: {
             height: 180
         },
         color: {
-            pattern: [blueColor, redColor, redColor]
+            pattern: [blueColor, redColor, whiteColor]
         },
         data: {
             x: 'x',
-            columns: [x, funded, unfunded, lgth],
+            columns: [x, req, receiv, lgth],
             axes: {
-                'Length of crisis': 'y2'
+                'Consecutive length of appeals': 'y2'
             },
             types: {
-                'Funded': 'bar',
-                'Unmet': 'bar'
+                'Funding requested': 'bar',
+                'Funding received': 'bar'
             },
             groups: [
-                ['Funded', 'Unmet']
+                ['Funding requested', 'Funding received']
             ]
         },
         axis: {
@@ -558,38 +506,38 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
                 }
             },
             y: {
-                // label: {
-                //     text: 'Population',
-                // },
+                label: {
+                    text: 'US$ million',
+                },
                 tick: {
                     count: 4,
-                    format: d3.format('.3s'),
+                    format: d3.format('.2s'),
                 },
-                show: false,
+                show: true,
                 padding: {
                     bottom: 0
                 }
             },
             y2: {
                 // label: {
-                //     text: 'Urban',
+                //     text: 'Consecutive length of appeals',
                 // },
                 tick: {
                     count: 4,
-                    format: d3.format(".1f"),
+                    format: d3.format(".2s"),
                 },
-                show: false,
+                show: true,
                 padding: {
                     bottom: 0
                 },
-                show: true
+                min: 0
             }
         },
-        legend: { hide: true },
+        legend: { hide: false },
         tooltip:{
             format: {
                 value: function(value, ratio, id ){
-                    var format = (id === 'Funded' || id === 'Unmet') ? formatPercent : d3.format("d");
+                    var format = (id === 'Funding requested' || id === 'Funding received') ? formatMillion : d3.format("d");
                     return format(value);
                 }
             }
@@ -599,27 +547,19 @@ function generateFundingsCharts(x, funded, unfunded, lgth) {
 } //generateFundingsCharts
 
 
-function c3BarLineChart(x, b, l, bind) {
-    let typeDefinition = {"Value": 'bar'},
-        axesDefinition = {"Length of crisis": 'y2'};
+function c3BarLineChart(x, b, bind) {
+    let typeDefinition = {"Rate": 'bar'},
+        yLabel = {text : b[0]};
 
-    if (b[0] === "IDPs") {
-        typeDefinition = {
-            "IDPs": 'bar'
-        }
-    } else if (b[0] === "Life expectancy") {
-        typeDefinition = {
-            "Life expectancy": 'bar'
-        }
-    }else if (b[0] === "Concerned") {
-        typeDefinition = {
-            "Concerned": 'bar'
-        };
-    }else if (b[0] === "Targeted") {
-        typeDefinition = {
-            "Targeted": 'bar'
-        };
-    }
+    b[0] === "Refugees" ? typeDefinition = {"Refugees" : 'bar'} :
+    b[0] === "IDPs" ? typeDefinition = {"IDPs" : 'bar'}:
+    b[0] === "Targeted" ? typeDefinition = {"Targeted" : 'bar'} :
+    b[0] === "Consecutive length of appeals" ? typeDefinition = {"Consecutive length of appeals" : 'bar'} :
+    b[0] === "Funding requested" ? typeDefinition = {"Funding requested" : 'bar'} :
+    b[0] === "Funding received" ? typeDefinition = {"Funding received" : 'bar'} :
+    b[0] === "Life expectancy" ? typeDefinition = {"Life expectancy" : 'bar'} :
+    b[0] === "Population" ? typeDefinition = {"Population" : 'bar'} :
+    b[0] === "Affected" ? typeDefinition = {"Affected" : 'bar'} : null;
 
     return c3.generate({
         bindto: '#'+bind,
@@ -632,8 +572,7 @@ function c3BarLineChart(x, b, l, bind) {
         },
         data: {
             x: 'x',
-            columns: [x, b, l],
-            axes: axesDefinition,
+            columns: [x, b],
             types: typeDefinition
         },
         axis: {
@@ -644,6 +583,7 @@ function c3BarLineChart(x, b, l, bind) {
                 }
             },
             y: {
+                label: yLabel,
                 tick: {
                     count: 4,
                     format: d3.format('.3s'),
@@ -652,21 +592,27 @@ function c3BarLineChart(x, b, l, bind) {
                 padding: {
                     bottom: 0
                 }
-            },
-            y2: {
-                tick: {
-                    count: 5,
-                    format: d3.format(".1f"),
-                },
-                padding: {
-                    bottom: 0
-                },
-                show: true
             }
         },
         legend: { hide: true },
         padding: {
             bottom: 0,
+        },
+        tooltip:{
+            format: {
+                value: function(value, ratio, id ){
+                    let format;
+                    (id === 'People of concern' || id === 'Population') ? format = d3.format(".2s") :
+                    id === 'Refugees' ? format = d3.format(".2s"):
+                    id === 'IDPs' ? format = d3.format(".2s") :
+                    (id === 'Targeted' || id === 'Affected') ? format = d3.format(".2s") :
+                    id === 'Consecutive length of appeals' ? format = d3.format("d") :
+                    (id === 'Funding requested' || id == 'Funding received') ? format = d3.format(".2s") :
+                    id === 'Life expectancy' ? format = d3.format("d") : format = formatPercent ;
+                    // var format = id === 'Rate' ? formatPercent : d3.format("d");
+                    return format(value);
+                }
+            }
         }
     });
 } //c3BarLineChart
