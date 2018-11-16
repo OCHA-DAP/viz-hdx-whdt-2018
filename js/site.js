@@ -556,6 +556,7 @@ function c3BarLineChart(x, b, bind) {
         yLabel = {text : b[0]};
 
     b[0] === "Refugees" ? typeDefinition = {"Refugees" : 'bar'} :
+    b[0] === "People of concern" ? typeDefinition = {"People of concern" : 'bar'} :
     b[0] === "IDPs" ? typeDefinition = {"IDPs" : 'bar'}:
     b[0] === "Targeted" ? typeDefinition = {"Targeted" : 'bar'} :
     b[0] === "Consecutive length of appeals" ? typeDefinition = {"Consecutive length of appeals" : 'bar'} :
