@@ -56,3 +56,12 @@ h6 {
     border-radius: 5px;
     font-size: 14px;
 }
+.hdx{
+    width: 70px;
+    display: inline;
+   }
+
+.footer{
+	padding-top : 10px;
+	padding-bottom: 10px;
+}

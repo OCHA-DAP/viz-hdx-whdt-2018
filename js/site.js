@@ -538,14 +538,14 @@ function generateFundingsCharts(x, req, receiv, lgth) {
             }
         },
         legend: { hide: false },
-        tooltip:{
-            format: {
-                value: function(value, ratio, id ){
-                    var format = (id === 'Funding requested' || id === 'Funding received') ? formatMillion : d3.format("d");
-                    return format(value);
-                }
-            }
-        }
+        // tooltip:{
+        //     format: {
+        //         value: function(value, ratio, id ){
+        //             var format = (id === 'Funding requested' || id === 'Funding received') ? formatMillion : d3.format("d");
+        //             return format(value);
+        //         }
+        //     }
+        // }
 
     });
 } //generateFundingsCharts
