@@ -24,7 +24,7 @@ var formatFloat = function(f){
     return d3.format(".2f")(f);
 }
 var formatBillion = function (d) {
-    return "$" + d +" B";
+    return d3.format(",.1f")(d) + " B";
 };
 
 var formatFundings = function (d) {
@@ -41,8 +41,9 @@ var formatYear = function(d){
 
 //tooltip bar
 var bartip = d3.tip().attr('class', 'd3-tip').html(function (d) {
-    return d.data.key + ': ' + d3.format('0,000')(d.y);
-
+    let ret;
+    (d.data.key === "Somalia" || d.data.key === "Central African Republic" || d.data.key === "DR Congo") ? ret = d.data.key + ': ' + d3.format('0,000')(d.y + 5) : ret = d.data.key + ': ' + d3.format('0,000')(d.y);
+    return ret;
 });
 
 function genF10 () {
@@ -362,7 +363,7 @@ function genererGraphesDetails(data) {
 
     crisesChart
         .width($('#crises').width())
-        .height(190)
+        .height(200)
         .margins({
             top: 5,
             right: 30,
@@ -504,7 +505,7 @@ function generateFundingsCharts(x, req, receiv, lgth) {
     return c3.generate({
         bindto: '#fundings',
         size: {
-            height: 180
+            height: 190
         },
         color: {
             pattern: [blueColor, redColor, whiteColor]
@@ -557,6 +558,7 @@ function generateFundingsCharts(x, req, receiv, lgth) {
             }
         },
         legend: { hide: false },
+        padding: {bottom: 10, top: 10}
         // tooltip:{
         //     format: {
         //         value: function(value, ratio, id ){
