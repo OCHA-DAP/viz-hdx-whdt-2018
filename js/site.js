@@ -41,9 +41,7 @@ var formatYear = function(d){
 
 //tooltip bar
 var bartip = d3.tip().attr('class', 'd3-tip').html(function (d) {
-    let ret;
-    (d.data.key === "Somalia" || d.data.key === "Central African Republic" || d.data.key === "DR Congo") ? ret = d.data.key + ': ' + d3.format('0,000')(d.y + 5) : ret = d.data.key + ': ' + d3.format('0,000')(d.y);
-    return ret;
+    return d.data.key + ': ' + d3.format('0,000')(d.y);
 });
 
 function genF10 () {
@@ -358,7 +356,10 @@ function genererGraphesDetails(data) {
     crisesDim = cf.dimension(function(d) {
         return d['#country+name'];
     });
-    crisesGroup = crisesDim.group().reduceCount();
+    crisesGroup = crisesDim.group().reduceSum(function(d){
+        return d['#indicator+consecutive+length_crisis'];
+    });
+
     crisesChart = dc.barChart('#crises');
 
     crisesChart
