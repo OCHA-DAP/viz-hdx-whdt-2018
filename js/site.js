@@ -28,7 +28,7 @@ var formatBillion = function (d) {
 };
 
 var formatFundings = function (d) {
-    return d3.format(",")(d) + " US$ billion";
+    return d3.format(',.2s')(d).replace('G', 'B');
 };
 
 var formatMM = function(d){
@@ -538,7 +538,7 @@ function generateFundingsCharts(x, req, receiv, lgth) {
                 },
                 tick: {
                     count: 4,
-                    format: d3.format(',.2s'),
+                    format: formatFundings,
                 },
                 show: true,
                 padding: {
